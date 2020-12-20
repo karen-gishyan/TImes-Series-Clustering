@@ -1,0 +1,63 @@
+﻿"Master Programe education institutions by indicators and years"
+
+"indicators";"2001";"2002";"2003";"2004";"2005";"2006";"2007";"2008";"2009";"2010";"2011";"2012";"2013";"2014";"2015";"2016";"2017";"2018";"2019"
+"Number of Master Programe education institutions, unit";3;3;4;6;13;17;19;32;32;32;35;37;41;45;45;47;46;45;46
+"Number of  higher educational institutions  of Master Programe education, unit";3;3;3;4;11;15;17;30;30;30;33;33;39;42;42;43;42;41;42
+"Number of other scientific organizations of Master Programe education, unit";0;0;1;2;2;2;2;2;2;2;2;2;2;3;3;4;4;4;4
+"Number of entrants, persons";1040;849;1449;1654;1929;2256;2392;4776;4998;6020;6889;7125;7541;7373;5807;6401;6192;5732;5640
+"Number of women entrants , persons";512;462;760;932;1102;1245;1295;3126;3381;4105;4779;4747;4973;4707;3574;3994;4293;3654;3778
+"Number of men entrants , persons";528;387;689;722;827;1011;1097;1650;1617;1915;2110;2378;2568;2666;2233;2407;1899;2078;1862
+"Number of state order  training entrants, persons";352;252;371;393;381;400;376;1564;1401;1691;1738;2078;1835;1928;1866;1828;1848;1496;1474
+"Number of state order training  women entrants, persons";175;136;220;247;225;194;228;981;981;1072;1110;1245;1069;1141;975;1107;1203;949;960
+"Number of state order  training men entrants , persons";177;116;151;146;156;206;148;583;420;619;628;833;766;787;891;721;645;547;514
+"Number of paid training  entrants, persons";688;597;1078;1261;1548;1856;2016;3212;3597;4329;5151;5047;5706;5445;3941;4573;4344;4236;4166
+"Number of paid training   women entrants, persons";337;326;540;685;877;1051;1067;2145;2400;3033;3669;3502;3904;3566;2599;2887;3090;2705;2818
+"Number of paid training   men entrants, persons";351;271;538;576;671;805;949;1067;1197;1296;1482;1545;1802;1879;1342;1686;1254;1531;1348
+"Number of students, persons";1796;1871;2530;3030;3541;4146;4344;7045;9081;10344;11547;12105;14932;14476;11911;10910;11793;10855;10395
+"Number of  woman students, persons";948;972;1266;1668;2077;2382;2460;4371;5904;7019;8180;8259;9978;9522;7421;6537;7886;7452;7118
+"Number of  man students, persons";848;899;1264;1362;1464;1764;1884;2674;3177;3325;3367;3846;4954;4954;4490;4373;3907;3403;3277
+"Number of  state order  training students, persons";680;576;697;786;788;786;759;2290;2808;3070;3150;3283;3649;3635;3503;3466;3622;3041;2718
+"Number of  state order  training woman students, persons";355;321;384;467;464;425;446;1374;1676;2088;2215;1982;2190;2203;2127;1897;2318;2053;1820
+"Number of  state order  training man students, persons";325;255;313;319;324;361;313;916;1132;982;935;1301;1459;1432;1376;1569;1304;988;898
+"Number of paid training  students, persons";1116;1295;1833;2244;2753;3360;3585;4755;6273;7274;8397;8822;11283;10841;8408;7444;8171;7814;7677
+"Number of paid training  woman students, persons";593;651;882;1201;1613;1957;2014;2997;4228;4931;5965;6277;7788;7319;5294;4640;5568;5399;5298
+"Number of paid training man students, persons";523;644;951;1043;1140;1403;1571;1758;2045;2343;2432;2545;3495;3522;3114;2804;2603;2415;2379
+"Number of graduates, persons";584;735;930;1077;1349;1654;1743;2148;2409;4696;4709;5175;7125;7522;6484;6507;4613;5483;5141
+"Number of woman graduates, persons";296;422;482;537;729;992;1022;1341;1527;2907;3239;3648;4906;5062;4371;4196;2651;3632;3694
+"Number of man graduates, persons";288;313;448;540;620;662;721;807;882;1789;1470;1527;2219;2460;2113;2311;1962;1851;1447
+"Number of state order  training graduates, persons";304;311;315;326;386;404;396;421;527;1648;1586;1614;1827;1889;1715;2140;1655;1665;1509
+"Number of state order  training woman graduates, persons";144;165;175;188;229;228;216;206;356;812;1102;1146;1164;1172;1055;1237;912;1091;1078
+"Number of state order  training man graduates, persons";160;146;140;138;157;176;180;215;171;836;484;468;663;717;660;903;743;574;431
+"Number of paid training  graduates, persons";280;424;615;751;963;1250;1347;1727;1882;3048;3123;3561;5298;5633;4769;4367;2958;3818;3632
+"Number of paid training  woman graduates, persons";152;257;307;349;500;764;806;1135;1171;2095;2137;2502;3742;3890;3316;2959;1739;2541;2616
+"Number of paid training man  graduates, persons";128;167;308;402;463;486;541;592;711;953;986;1059;1556;1743;1453;1408;1219;1277;1016
+"Number of foreign entrants, persons";9;13;10;37;51;45;83;181;167;146;205;161;115;159;183;158;164;164;124
+"Number of foreign woman entrants, persons";4;8;6;21;30;21;46;74;73;57;109;90;54;84;96;80;84;93;65
+"Number of foreign man entrants, persons";5;5;4;16;21;24;37;107;94;89;96;71;61;75;87;78;80;71;59
+"Number of state order  training foreign entrants, persons";4;3;3;8;3;3;16;48;73;27;22;28;14;47;62;45;46;61;62
+"Number of state order  training foreign woman  entrants, persons";3;2;3;3;2;2;10;20;32;10;10;7;7;29;36;23;27;41;37
+"Number of state order  training foreign man entrants, persons";1;1;0;5;1;1;6;28;41;17;12;21;7;18;26;22;19;20;25
+"Number of paid training  foreign entrants, persons";5;10;7;29;48;42;67;133;94;119;183;133;101;112;121;113;118;103;62
+"Number of paid training  foreign woman entrants, persons";1;6;3;18;28;19;36;54;41;47;99;83;47;55;60;57;57;52;28
+"Number of paid training  foreign man entrants, persons";4;4;4;11;20;23;31;79;53;72;84;50;54;57;61;56;61;51;34
+"Number of foreign students, persons";22;35;22;51;85;88;119;234;233;214;287;275;265;282;314;282;318;308;252
+"Number of foreign woman students, persons";9;17;13;27;48;42;69;96;109;91;151;146;133;144;153;135;164;182;139
+"Number of foreign man students, persons";13;18;9;24;37;46;50;138;124;123;136;129;132;138;161;147;154;126;113
+"Number of state order  training  foreign students, persons";5;15;6;13;6;7;27;64;97;46;40;42;37;66;89;73;92;98;110
+"Number of state order  training  foreign woman  students, persons";3;8;5;6;2;6;19;33;44;21;19;26;19;38;49;29;46;72;67
+"Number of state order  training  foreign man  students, persons";2;7;1;7;4;1;8;31;53;25;21;16;18;28;40;44;46;26;43
+"Number of paid training   foreign students, persons";17;20;16;38;79;81;92;170;136;168;247;233;228;216;225;209;226;210;142
+"Number of paid training   foreign woman  students, persons";6;9;8;21;46;36;50;63;65;70;132;120;114;106;104;106;118;110;72
+"Number of paid training   foreign man students, persons";11;11;8;17;33;45;42;107;71;98;115;113;114;110;121;103;108;100;70
+"Number of foreign graduates, persons";3;18;10;17;14;32;59;32;55;96;123;134;168;173;130;122;120;150;141
+"Number of foreign woman graduates, persons";1;6;3;7;6;17;20;19;25;38;52;67;86;96;61;63;48;85;85
+"Number of foreign man graduates, persons";2;12;7;10;8;15;39;13;30;58;71;67;82;77;69;59;72;65;56
+"Number of state order  training foreign graduates, persons";1;3;3;4;3;3;2;1;26;20;24;29;20;43;40;27;31;46;42
+"Number of state order  training foreign woman graduates, persons";0;1;1;2;2;3;2;1;12;10;11;16;9;23;19;16;9;26;35
+"Number of state order  training foreign man graduates, persons";1;2;2;2;1;0;0;0;14;10;13;13;11;20;21;11;22;20;7
+"Number of paid training  foreign graduates, persons";2;15;7;13;11;29;57;31;29;76;99;105;148;130;90;95;89;104;99
+"Number of paid training  foreign woman graduates, persons";1;5;2;5;4;14;18;18;13;28;41;51;77;73;42;47;39;59;50
+"Number of paid training  foreign man graduates, persons";1;10;5;8;7;15;39;13;16;48;58;54;71;57;48;48;50;45;49
+"Number of  detached RA citizens  by the RA Ministry of Education and Science within the framework of";0;0;10;12;15;27;12;19;22;46;94;81;61;69;21;21;88;114;84
+"Number of  detached RA woman citizens  by the RA Ministry of Education and Science within the framew";0;0;1;1;3;7;3;8;7;11;14;27;13;32;7;11;41;62;53
+"Number of  detached RA man citizens  by the RA Ministry of Education and Science within the framewor";0;0;9;11;12;20;9;11;15;35;80;54;48;37;14;10;47;52;31
