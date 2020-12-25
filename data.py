@@ -21,8 +21,15 @@ def read_csv(path,save=False,save_title="output"):
 def visualize_series(data, column_list=None,ncols=3):
 	
 	"""
-	column_list: list of column names to visualize.
-	ncols: Number of columns to visualize if no column list is specified.
+	Plots the dataset columns.
+
+	Parameters:
+	
+	column_list: list, optional
+		list of column names to visualize.
+
+	ncols: int (default=3) 
+		Number of columns to visualize if no column list is specified.
 	"""
 
 	for i, column in enumerate(data.columns):
@@ -48,8 +55,7 @@ if __name__=="__main__":
 	masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
 	phd_data=read_csv("datasets/phd.csv",save=True,save_title="phd_final")
 	
-
 	visualize_series(data=masters_data)
 	print(masters_data.shape)
-	print(phd_data.columns)
+	#print(phd_data.columns)
 	

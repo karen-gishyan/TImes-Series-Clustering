@@ -4,69 +4,87 @@ warnings.filterwarnings("ignore",category=FutureWarning)
 from data import *
 import numpy as np
 from tslearn.utils import to_time_series,to_time_series_dataset
-from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
-from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+from tslearn.clustering import TimeSeriesKMeans, KernelKMeans, silhouette_score
+from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScalerMinMax
 
 
 
 
-def tutorial_function():
+def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw"):
+
+	"""
+	Performs times series clustering.
+
+	Parameters:
+
+	nclusters: int (default: 5)
+		Number of clusters to form.
+
+	preprocess: str ["scale_mean_variance","min_max"],  optional
+		scale_mean_variance scales times series in each dimension to mean =0.0, std=1.0
+		min_max scales the times series between 0.0 and 1.0
+	
+	distance_metric: str {"dtw","euclidean"}, (default: "dtw")
+		the distance metric to be used between the series.	
+	"""
+
+	ts_list=[]
+	names_list=[]
+	for label, series in data.iloc[:,:ncols].items():
+
+		ts_list.append(series)
+		names_list.append(label)
+
+	ts_data=to_time_series_dataset(np.array(ts_list))
+	
+	if preprocess=="scale_mean_variance": 
+		ts_data=TimeSeriesScalerMeanVariance().fit_transform(ts_data)
+
+	elif preprocess=="min_max":
+
+		ts_data=TimeSeriesScalerMinMax().fit_transform(ts_data)
 
 
-	series=[1,3,4,2]
-	formated_tseries=to_time_series(series) # 4 rows and 1 column.
-	print("The shape and type of the series are {}, {}".format(formated_tseries.shape,type(formated_tseries)))
-	#print(formated_tseries)
+	#print(ts_data)
+	rows=ts_data.shape[1]
 
-	second_series=[1,2,4,2,5]
-	formated_dataset=to_time_series_dataset([series,second_series])
-	print("The shape of the dataset is {}".format(formated_dataset.shape)) # 3 dimensional-  2 ts datasets(can consider series), with 4 rows and 1 column.
-	print(formated_dataset) 
-
-#tutorial_function()
+	print(ts_data.shape)
+	# print(ts_data)
 
 
+	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11)
+	pred=km.fit_predict(ts_data)
+	print(pred)
+	# sys.exit()
 
-masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
+	plt.figure()
+	for cluster in range(nclusters):  # number of clusters
+		
+		plt.subplot(nclusters, 1, cluster+1)
+		
 
+		for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.
+			
+			plt.plot(ts_series.ravel(), "k-",alpha=0.5,label=names_list[i])
 
-ts_list=[]
-for label, series in masters_data.iloc[:,:15].items():
+		plt.plot(km.cluster_centers_[cluster].ravel(), "b")
+		plt.legend(loc="upper right")   
+		# plt.xlim(0, rows)
+		
+		plt.title("Cluster %d" % (cluster + 1))
 
-	ts_list.append(series)
+	plt.tight_layout()
 
+	plt.show()
 
-ts_data=to_time_series_dataset(np.array(ts_list))
-
-rows=ts_data.shape[1]
-
-print(ts_data.shape)
-#sys.exit()
-
-
-km=TimeSeriesKMeans(n_clusters=5,metric="dtw")
-pred=km.fit_predict(ts_data)
-
-
-plt.figure()
-for cluster in range(3):  # number of clusters
-    
-    plt.subplot(3, 1, cluster+1)
-    
-    for ts_series in ts_data[pred == cluster]:
-        plt.plot(ts_series.ravel(), "k-",alpha=0.5)
-    plt.plot(km.cluster_centers_[cluster].ravel(), "b")
-    #plt.xlim(0, rows)
-    #plt.ylim(-4, 4)
-    plt.title("Cluster %d" % (cluster + 1))
-
-plt.tight_layout()
-plt.show()
+	sil_score=silhouette_score(ts_list, pred, metric="dtw")
+	print(sil_score) # understand what this means.
 
 
 
-# to do.
-#standardization, title selection. # check if decompostion needs to be done.
+if __name__ == '__main__':
 
+	masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
+	clustering(masters_data,preprocess="min_max")
 
 
