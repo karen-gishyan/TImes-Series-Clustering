@@ -7,10 +7,11 @@ import sys
 def read_csv(path,save=False,save_title="output"):
 	
 	data=pd.read_csv(path,sep=";",skiprows=2) 
-	data=data.set_index(data.columns[0]) # sets the row label.
-	data=data.T 
+	data=data.set_index(data.columns[0]) # the variable names as indices.
+	data=data.transpose() # transposes the indexes and columns.
 	
-
+	data.index=pd.to_datetime(data.index)
+	
 	if save:
 		path=os.path.join(os.getcwd(),"datasets",save_title+".csv") 
 		
@@ -47,15 +48,3 @@ def visualize_series(data, column_list=None,ncols=3):
 				break	
 		
 		plt.show()
-
-
-
-if __name__=="__main__":
-	
-	masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
-	phd_data=read_csv("datasets/phd.csv",save=True,save_title="phd_final")
-	
-	visualize_series(data=masters_data)
-	print(masters_data.shape)
-	#print(phd_data.columns)
-	

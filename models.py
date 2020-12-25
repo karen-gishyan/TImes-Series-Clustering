@@ -17,14 +17,14 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 
 	Parameters:
 
-	nclusters: int (default: 5)
+	nclusters: int (default: 5), optional
 		Number of clusters to form.
 
-	preprocess: str ["scale_mean_variance","min_max"],  optional
+	preprocess: str {"scale_mean_variance","min_max"},  optional
 		scale_mean_variance scales times series in each dimension to mean =0.0, std=1.0
 		min_max scales the times series between 0.0 and 1.0
 	
-	distance_metric: str {"dtw","euclidean"}, (default: "dtw")
+	distance_metric: str ["dtw","euclidean"], (default: "dtw"), optional
 		the distance metric to be used between the series.	
 	"""
 
