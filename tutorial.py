@@ -1,3 +1,6 @@
+from tslearn.utils import to_time_series,to_time_series_dataset
+
+import matplotlib.pyplot as plt 
 def tutorial_function():
 
 	"""

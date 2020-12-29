@@ -5,7 +5,6 @@ import sys
 
 
 def read_csv(path,save=False,save_title="output"):
-	
 	data=pd.read_csv(path,sep=";",skiprows=2) 
 	data=data.set_index(data.columns[0]) # the variable names as indices.
 	data=data.transpose() # transposes the indexes and columns.
@@ -48,3 +47,5 @@ def visualize_series(data, column_list=None,ncols=3):
 				break	
 		
 		plt.show()
+
+	

@@ -16,7 +16,8 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 	Performs times series clustering.
 
 	Parameters:
-
+	
+	data: pandas DataFrame.
 	nclusters: int (default: 5), optional
 		Number of clusters to form.
 
@@ -48,13 +49,13 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 	#print(ts_data)
 	rows=ts_data.shape[1]
 
-	print(ts_data.shape)
+	#print(ts_data.shape)
 	# print(ts_data)
 
 
 	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11)
 	pred=km.fit_predict(ts_data)
-	print(pred)
+	#print(pred)
 	# sys.exit()
 
 	plt.figure()
@@ -78,12 +79,15 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 	plt.show()
 
 	sil_score=silhouette_score(ts_list, pred, metric="dtw")
-	print(sil_score) # understand what this means.
+	print("The silhouette_score is",sil_score) # understand what this means.
 
 
 
 if __name__ == '__main__':
 
+	#if decomposition needed, should be decomposed, appended to a new dataset, then clustered.
+	
+	#expected procedure.
 	masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
 	clustering(masters_data,preprocess="min_max")
 
