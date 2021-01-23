@@ -1,19 +1,17 @@
 import warnings
 warnings.filterwarnings("ignore",category=FutureWarning)
-
 from data import *
 import numpy as np
 from tslearn.utils import to_time_series,to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans, silhouette_score
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScalerMinMax
+from yellowbrick.cluster import SilhouetteVisualizer
 
 
-
-
-def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw"):
+def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",plot=False):
 
 	"""
-	Performs times series clustering.
+	Performs times series clustering, returns the silhouette score.
 
 	Parameters:
 	
@@ -33,10 +31,12 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 	names_list=[]
 	for label, series in data.iloc[:,:ncols].items():
 
-		ts_list.append(series)
+		ts_list.append(series) # series become rows.
 		names_list.append(label)
 
-	ts_data=to_time_series_dataset(np.array(ts_list))
+	two_dim_data=np.array(ts_list) 
+	#print(np.array(ts_list).shape)	
+	ts_data=to_time_series_dataset(two_dim_data)
 	
 	if preprocess=="scale_mean_variance": 
 		ts_data=TimeSeriesScalerMeanVariance().fit_transform(ts_data)
@@ -44,51 +44,39 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw")
 	elif preprocess=="min_max":
 
 		ts_data=TimeSeriesScalerMinMax().fit_transform(ts_data)
-
-
-	#print(ts_data)
+	
 	rows=ts_data.shape[1]
-
-	#print(ts_data.shape)
-	# print(ts_data)
-
-
 	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11)
 	pred=km.fit_predict(ts_data)
-	#print(pred)
-	# sys.exit()
-
-	plt.figure()
-	for cluster in range(nclusters):  # number of clusters
-		
-		plt.subplot(nclusters, 1, cluster+1)
-		
-
-		for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.
-			
-			plt.plot(ts_series.ravel(), "k-",alpha=0.5,label=names_list[i])
-
-		plt.plot(km.cluster_centers_[cluster].ravel(), "b")
-		plt.legend(loc="upper right")   
-		# plt.xlim(0, rows)
-		
-		plt.title("Cluster %d" % (cluster + 1))
-
-	plt.tight_layout()
-
-	plt.show()
-
-	sil_score=silhouette_score(ts_list, pred, metric="dtw")
-	print("The silhouette_score is",sil_score) # understand what this means.
-
-
-
-if __name__ == '__main__':
-
-	#if decomposition needed, should be decomposed, appended to a new dataset, then clustered.
 	
-	#expected procedure.
-	masters_data=read_csv("datasets/masters.csv",save=True,save_title="masters_final")
-	clustering(masters_data,preprocess="min_max")
+	if plot:
 
+		plt.figure()
+		for cluster in range(nclusters):  
+			
+			plt.subplot(nclusters, 1, cluster+1)
+			
+			for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.
+				
+				plt.plot(ts_series.ravel(),"k-", alpha=0.3) # "k-",label=names_list[i]
+
+			plt.plot(km.cluster_centers_[cluster].ravel(), "b")
+			plt.legend(loc="upper right")   
+			# plt.xlim(0, rows)
+			
+			plt.title("Cluster %d" % (cluster + 1))
+
+		plt.tight_layout()
+		plt.show()
+
+	sil_score=silhouette_score(ts_list, pred, metric="dtw")	 
+	
+	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data}
+
+
+def visualize_silhoueete(model,data,plot=True):
+
+	vis=SilhouetteVisualizer(model)
+	vis.fit(data) # 2D.
+	if plot: vis.poof()
 

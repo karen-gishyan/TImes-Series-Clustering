@@ -44,8 +44,7 @@ def visualize_series(data, column_list=None,ncols=3):
 			plt.plot(data[column],label=column)
 			plt.legend()
 			if i==ncols:	
-				break	
-		
+				break			
 		plt.show()
 
 	

@@ -53,15 +53,18 @@ class TimesSeries:
 
 	def test_stationarity(self,max_lag=None,regression='c',auto_lag='AIC'):
 		
+		"""
+		Conduct's a Dickey Fuller Test.
+		"""
+		
 		self.stationarity_test=adfuller(self.series,autolag=auto_lag,maxlag=max_lag,regression=regression)
-		return self.stationarity_test
+		
+		output=pd.Series(self.stationarity_test[0:4], index=['Test Statistic','p-value','Number of Lags Used','Number of Observations Used'])	
+		
+		for key, value in self.stationarity_test[4].items():
+			output["Critical Value {}".format(key)]=value
+		
+		return output
 
 
-
-if __name__ == '__main__':
-
-	#expected procedure.
-	phd_data=read_csv("datasets/phd.csv",save=True,save_title="phd_final")
-	ts=TimesSeries(phd_data.iloc[:,50]).decompose().plot_decomposition() # method cascading through return self.
-	res=ts.test_stationarity()
-	print(res)
+	 

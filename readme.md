@@ -1,3 +1,4 @@
 ### To do
-[ ] Silhouette score, decompostion, standardization needs checking
-
+[ ] Check data transpose, outliers, dim reduction.
+[ ] Check Silhouette score, decompostion, standardization.
+[ ] Iteratively select k. 
