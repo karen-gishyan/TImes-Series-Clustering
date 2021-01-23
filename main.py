@@ -1,6 +1,6 @@
 ####  Main procedure.
 # Check decomposition, stationarity. -✓
-# Check decompostion, stationarity relation, do series transformation if needed.
+# Check decompostion, stationarity relation, do series transformation if needed. -✓ 
 # Check dim reduction.
 # Check standardization.-✓
 # Check iteratively selecting ks. -✓
@@ -115,11 +115,13 @@ print("Number of observations in PhD after differencing is are {} and {}".format
 ### To account for negative values and for scaling, we do a Min-Max normalization.
 
 
-# decompose_and_test_stationarity(masters_diff,ncols=3)
+#decompose_and_test_stationarity(masters_diff,ncols=3)
 # decompose_and_test_stationarity(phd_diff,ncols=3)
 
 
 #  Column wise min-max normalization from 0 to 1.
+# The decomposition results stay the same after normalization.
+
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
 #decompose_and_test_stationarity(normalized_masters_diff,ncols=3)
 
