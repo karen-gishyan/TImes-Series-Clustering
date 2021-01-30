@@ -1,5 +1,7 @@
 import warnings
 warnings.filterwarnings("ignore",category=FutureWarning)
+warnings.filterwarnings("ignore",category=UserWarning)
+
 from data import *
 import numpy as np
 from tslearn.utils import to_time_series,to_time_series_dataset
@@ -8,7 +10,7 @@ from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScaler
 from yellowbrick.cluster import SilhouetteVisualizer
 
 
-def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",plot=False):
+def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
 
 	"""
 	Performs times series clustering, returns the silhouette score.
@@ -52,20 +54,25 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",
 	if plot:
 
 		plt.figure()
+
 		for cluster in range(nclusters):  
 			
 			plt.subplot(nclusters, 1, cluster+1)
 			
 			for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.
 				
-				plt.plot(ts_series.ravel(),"k-", alpha=0.3) # "k-",label=names_list[i]
+				plt.plot(ts_series.ravel(),"k-", alpha=0.3,label=names_list[i]) 
+				#plt.plot(ts_series.ravel(),"k-", alpha=0.3) 
+
 
 			plt.plot(km.cluster_centers_[cluster].ravel(), "b")
-			plt.legend(loc="upper right")   
+			plt.legend(loc="upper left",bbox_to_anchor=(1,1))  
 			# plt.xlim(0, rows)
 			
 			plt.title("Cluster %d" % (cluster + 1))
 
+		if title: plt.suptitle("{}".format(title))
+		
 		plt.tight_layout()
 		plt.show()
 
