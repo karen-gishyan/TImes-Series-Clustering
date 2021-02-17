@@ -8,9 +8,10 @@ from tslearn.utils import to_time_series,to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans, silhouette_score
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScalerMinMax
 from yellowbrick.cluster import SilhouetteVisualizer
+from times_series import *
 
 
-def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
+def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
 
 	"""
 	Performs times series clustering, returns the silhouette score.
@@ -18,6 +19,8 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",
 	Parameters:
 	
 	data: pandas DataFrame.
+	ncols: int (default None)
+		Number of dataset columns to subset from o index.
 	nclusters: int (default: 5), optional
 		Number of clusters to form.
 
@@ -29,9 +32,17 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",
 		the distance metric to be used between the series.	
 	"""
 
-	ts_list=[]
-	names_list=[]
-	for label, series in data.iloc[:,:ncols].items():
+
+	ts_list,names_list =[],[]
+	number_of_cols=data.shape[1]
+
+	if not ncols: ncols= number_of_cols
+
+	else:
+		assert ncols< number_of_cols 
+
+
+	for label, series in data.iloc[:,:ncols].items(): # if ncols >number_of_cols pandas handles  it by taking max cols, but we make an assertion.
 
 		ts_list.append(series) # series become rows.
 		names_list.append(label)
@@ -77,13 +88,42 @@ def clustering(data,ncols=15,nclusters=5,preprocess=None, distance_metric="dtw",
 		plt.show()
 
 	sil_score=silhouette_score(ts_list, pred, metric="dtw")	 
+
 	
-	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data}
+	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters}
 
 
 def visualize_silhoueete(model,data,plot=True):
 
 	vis=SilhouetteVisualizer(model)
+	
+
 	vis.fit(data) # 2D.
 	if plot: vis.poof()
 
+
+
+def decompose_and_test_stationarity(df,ncols=None,plot=False):
+	
+	"""
+	Returning the P values of stationary for each columns.
+	P-value of more than 5% indicates non-stationarity,
+	"""
+
+	stationarity_dict={}
+	for index, column in enumerate(df):
+
+		pts=TimesSeries(df[column])	
+		if plot: pts.decompose(method="additive").plot_decomposition()
+		
+		# print(column)
+		# print(pts.test_stationarity())
+		# print("-------")
+
+		p_value=pts.test_stationarity()["p-value"] # Only for p values.
+		stationarity_dict["{}. P-value for {} column".format(index, column)]=p_value
+		
+		if ncols:
+			if index==ncols-1: break
+
+	return stationarity_dict
