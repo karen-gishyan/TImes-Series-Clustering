@@ -6,11 +6,18 @@ import sys
 
 def read_csv(path,save=False,save_title="output"):
 	data=pd.read_csv(path,sep=";",skiprows=2) 
+	
 	data=data.set_index(data.columns[0]) # the variable names as indices.
 	data=data.transpose() # transposes the indexes and columns.
 	
-	data.index=pd.to_datetime(data.index)
 	
+	data.index=pd.DatetimeIndex(data.index,freq="AS")
+
+	### seting index manually. much more robust than the commented code above, which infers freq and only allows AS.
+	### however, as we deal with two datasets, DatetimeIndex is more preferable.
+	
+	#data.index=pd.date_range(start="2001-01-01",periods=19,freq="AS") 
+
 	if save:
 		path=os.path.join(os.getcwd(),"datasets",save_title+".csv") 
 		
@@ -47,4 +54,5 @@ def visualize_series(data, column_list=None,ncols=3):
 				break			
 		plt.show()
 
+	
 	

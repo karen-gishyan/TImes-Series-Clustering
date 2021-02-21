@@ -1,5 +1,6 @@
 from data import *
-from statsmodels.tsa.seasonal import seasonal_decompose
+from utils import *
+from statsmodels.tsa.seasonal import seasonal_decompose, STL
 from statsmodels.tsa.stattools import adfuller
 
 
@@ -26,7 +27,10 @@ class TimesSeries:
 			decompostion method.
 		"""
 
-		self.decomposed_obj=seasonal_decompose(self.series,model=method) #statsmodels class.
+		### period is inferred from index, alternatively can be set to freq=1, for yearly.
+		### period =n means we get a cycle after every n observations.
+		### https://robjhyndman.com/hyndsight/seasonal-periods/
+		self.decomposed_obj=seasonal_decompose(self.series,model=method,period=2) #statsmodels.tsa.seasonal.DecomposeResult class.
 		return self	
 	
 
@@ -68,3 +72,15 @@ class TimesSeries:
 
 
 	 
+if __name__	=="__main__":
+	
+	masters_data=read_csv("datasets/masters.csv")
+	#decompose_and_test_stationarity(masters_data,ncols=1,plot=True)
+	ts=TimesSeries(masters_data.iloc[:,7])
+	#print(ts.test_stationarity())
+
+	### with periods= 2, our residuals demonstrate the best stationarity.
+	sample=ts.decompose()	
+	residuals=sample.decomposed_obj.resid.dropna()
+	print(TimesSeries(residuals).test_stationarity()) 
+	#TimesSeries(residuals).decompose().plot_decomposition()

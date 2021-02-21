@@ -15,6 +15,7 @@ import time
 masters_data=read_csv("datasets/masters.csv")
 phd_data=read_csv("datasets/phd.csv")
 
+
 ### removes trailing space before the comma.
 masters_data.columns=[re.sub('\\s*([,])s*', r'\1', mcol) for mcol in masters_data.columns]
 phd_data.columns=[re.sub('\\s*([,])s*', r'\1', pcol) for pcol in phd_data.columns]
