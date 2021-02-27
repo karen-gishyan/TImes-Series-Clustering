@@ -75,6 +75,7 @@ class TimesSeries:
 if __name__	=="__main__":
 	
 	masters_data=read_csv("datasets/masters.csv")
+	
 	#decompose_and_test_stationarity(masters_data,ncols=1,plot=True)
 	ts=TimesSeries(masters_data.iloc[:,7])
 	#print(ts.test_stationarity())
@@ -82,5 +83,5 @@ if __name__	=="__main__":
 	### with periods= 2, our residuals demonstrate the best stationarity.
 	sample=ts.decompose()	
 	residuals=sample.decomposed_obj.resid.dropna()
-	print(TimesSeries(residuals).test_stationarity()) 
-	#TimesSeries(residuals).decompose().plot_decomposition()
+	print(TimesSeries(residuals).test_stationarity()) 	
+	#TimesSeries(residuals).decompose().plot_decomposition()s

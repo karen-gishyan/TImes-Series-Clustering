@@ -5,11 +5,13 @@ warnings.filterwarnings("ignore",category=UserWarning)
 from data import *
 import numpy as np
 from tslearn.utils import to_time_series,to_time_series_dataset
-from tslearn.clustering import TimeSeriesKMeans, KernelKMeans, silhouette_score
+from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
+from tslearn.clustering import silhouette_score as tslearn_silhouette
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScalerMinMax
 from yellowbrick.cluster import SilhouetteVisualizer
 from times_series import *
-
+from sklearn.metrics import silhouette_score as sklearn_silhouette, silhouette_samples
+import statistics
 
 def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
 
@@ -59,7 +61,7 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		ts_data=TimeSeriesScalerMinMax().fit_transform(ts_data)
 	
 	rows=ts_data.shape[1]
-	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11)
+	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11) 
 	pred=km.fit_predict(ts_data)
 	
 	if plot:
@@ -87,16 +89,24 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		plt.tight_layout()
 		plt.show()
 
-	sil_score=silhouette_score(ts_list, pred, metric="dtw")	 
+	#sil_score=sklearn_silhouette(two_dim_data, pred, metric="jaccard") # it highly makes sense for the metrics to match.	 
+	#print(sil_score)
 
-	
+	# sil_score=silhouette_samples(two_dim_data, pred, metric="euclidean") # returns the silhouette scores for each sample.
+	# print(sil_score,statistics.mean(sil_score))
+
+	sil_score=tslearn_silhouette(two_dim_data, pred, metric="dtw") 
+	print(sil_score)
+
+
 	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters}
 
 
+### Based on the default implementation, visualizes based on "euclidean".
+### Needs more customization.
 def visualize_silhoueete(model,data,plot=True):
 
-	vis=SilhouetteVisualizer(model)
-	
+	vis=SilhouetteVisualizer(model) # is_fitted
 
 	vis.fit(data) # 2D.
 	if plot: vis.poof()

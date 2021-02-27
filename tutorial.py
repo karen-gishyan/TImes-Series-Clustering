@@ -1,6 +1,6 @@
 from tslearn.utils import to_time_series,to_time_series_dataset
-
 import matplotlib.pyplot as plt 
+
 def tutorial_function():
 
 	"""
@@ -16,4 +16,5 @@ def tutorial_function():
 	formated_dataset=to_time_series_dataset([series,second_series])
 	print("The shape of the dataset is {}".format(formated_dataset.shape)) # 3 dimensional-  2 ts datasets, with 4 rows and 1 column.
 	#print(formated_dataset) 
+
 
