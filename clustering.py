@@ -2,16 +2,16 @@ import warnings
 warnings.filterwarnings("ignore",category=FutureWarning)
 warnings.filterwarnings("ignore",category=UserWarning)
 
-from data import *
+from data import * 
 import numpy as np
+import statistics
 from tslearn.utils import to_time_series,to_time_series_dataset
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
 from tslearn.clustering import silhouette_score as tslearn_silhouette
-from tslearn.preprocessing import TimeSeriesScalerMeanVariance, TimeSeriesScalerMinMax
+from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from yellowbrick.cluster import SilhouetteVisualizer
-from times_series import *
 from sklearn.metrics import silhouette_score as sklearn_silhouette, silhouette_samples
-import statistics
+
 
 def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
 
@@ -89,14 +89,14 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		plt.tight_layout()
 		plt.show()
 
-	#sil_score=sklearn_silhouette(two_dim_data, pred, metric="jaccard") # it highly makes sense for the metrics to match.	 
+	#sil_score=sklearn_silhouette(two_dim_data, pred, metric="euclidean") #jaccard.	 
 	#print(sil_score)
 
 	# sil_score=silhouette_samples(two_dim_data, pred, metric="euclidean") # returns the silhouette scores for each sample.
 	# print(sil_score,statistics.mean(sil_score))
 
 	sil_score=tslearn_silhouette(two_dim_data, pred, metric="dtw") 
-	print(sil_score)
+	#print(sil_score)
 
 
 	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters}
@@ -104,36 +104,41 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 
 ### Based on the default implementation, visualizes based on "euclidean".
 ### Needs more customization.
+
+class Visualize_Silhouette(SilhouetteVisualizer):
+
+	def __init__(self,estimator,data,distance_metric="dtw"):
+
+		#self.estimator=estimator
+		self.distance_metric=distance_metric
+		self.data=data
+		super().__init__(estimator)
+
+
+	def fit(self):
+
+		self.n_samples_=self.data.shape[0]
+		self.n_clusters_=self.estimator.n_clusters
+		labels=self.estimator.fit_predict(self.data)
+		
+
+		### score is based on dtw, samples based on #sklearn euclidean.
+		### To do: to implement samples based on dynamic time warping.
+		self.silhouette_score_ = tslearn_silhouette(self.data, labels,metric=self.distance_metric)
+		self.silhouette_samples_ = silhouette_samples(self.data, labels)	
+
+		self.draw(labels)
+		return self
+
+
 def visualize_silhoueete(model,data,plot=True):
 
-	vis=SilhouetteVisualizer(model) # is_fitted
+	vis=Visualize_Silhouette(model,data) # is_fitted
 
-	vis.fit(data) # 2D.
+	vis.fit() # 2D.
 	if plot: vis.poof()
 
 
 
-def decompose_and_test_stationarity(df,ncols=None,plot=False):
-	
-	"""
-	Returning the P values of stationary for each columns.
-	P-value of more than 5% indicates non-stationarity,
-	"""
-
-	stationarity_dict={}
-	for index, column in enumerate(df):
-
-		pts=TimesSeries(df[column])	
-		if plot: pts.decompose(method="additive").plot_decomposition()
-		
-		# print(column)
-		# print(pts.test_stationarity())
-		# print("-------")
-
-		p_value=pts.test_stationarity()["p-value"] # Only for p values.
-		stationarity_dict["{}. P-value for {} column".format(index, column)]=p_value
-		
-		if ncols:
-			if index==ncols-1: break
-
-	return stationarity_dict
+if __name__ == '__main__':
+	help(SilhouetteVisualizer)

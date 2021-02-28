@@ -1,10 +1,9 @@
-from data import *
-from utils import *
-from statsmodels.tsa.seasonal import seasonal_decompose, STL
+from data import * 
+from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
 
 
-class TimesSeries:
+class TimeSeries:
 
 	def __init__(self,series):
 
@@ -71,17 +70,43 @@ class TimesSeries:
 		return output
 
 
-	 
+def decompose_and_test_stationarity(df,ncols=None,plot=False):
+	
+	"""
+	Returning the P values of stationary for each columns.
+	P-value of more than 5% indicates non-stationarity,
+	"""
+
+	stationarity_dict={}
+	for index, column in enumerate(df):
+
+		pts=TimeSeries(df[column])	
+		if plot: pts.decompose(method="additive").plot_decomposition()
+		
+		# print(column)
+		# print(pts.test_stationarity())
+		# print("-------")
+
+		p_value=pts.test_stationarity()["p-value"] # Only for p values.
+		stationarity_dict["{}. P-value for {} column".format(index, column)]=p_value
+		
+		if ncols:
+			if index==ncols-1: break
+
+	return stationarity_dict
+
+	
+
 if __name__	=="__main__":
 	
 	masters_data=read_csv("datasets/masters.csv")
 	
 	#decompose_and_test_stationarity(masters_data,ncols=1,plot=True)
-	ts=TimesSeries(masters_data.iloc[:,7])
+	ts=TimeSeries(masters_data.iloc[:,7])
 	#print(ts.test_stationarity())
 
 	### with periods= 2, our residuals demonstrate the best stationarity.
 	sample=ts.decompose()	
 	residuals=sample.decomposed_obj.resid.dropna()
-	print(TimesSeries(residuals).test_stationarity()) 	
-	#TimesSeries(residuals).decompose().plot_decomposition()s
+	print(TimeSeries(residuals).test_stationarity()) 	
+	#TimeSeries(residuals).decompose().plot_decomposition()s

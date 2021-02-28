@@ -6,10 +6,11 @@
 ###  Check iteratively selecting ks. -✓
 ###  Evaluete using silhouette scores, and visualize. -✓
 
-from utils import *
+from clustering import *
 from data import *
-import re
+from time_series import decompose_and_test_stationarity
 from sklearn.preprocessing import MinMaxScaler
+import re
 import time
 
 masters_data=read_csv("datasets/masters.csv")
