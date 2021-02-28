@@ -6,6 +6,7 @@ from data import *
 import numpy as np
 import statistics
 from tslearn.utils import to_time_series,to_time_series_dataset
+from tslearn.metrics import cdist_dtw
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
 from tslearn.clustering import silhouette_score as tslearn_silhouette
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
@@ -33,7 +34,6 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 	distance_metric: str ["dtw","euclidean"], (default: "dtw"), optional
 		the distance metric to be used between the series.	
 	"""
-
 
 	ts_list,names_list =[],[]
 	number_of_cols=data.shape[1]
@@ -65,7 +65,6 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 	pred=km.fit_predict(ts_data)
 	
 	if plot:
-
 		plt.figure()
 
 		for cluster in range(nclusters):  
@@ -76,7 +75,6 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 				
 				plt.plot(ts_series.ravel(),"k-", alpha=0.3,label=names_list[i]) 
 				#plt.plot(ts_series.ravel(),"k-", alpha=0.3) 
-
 
 			plt.plot(km.cluster_centers_[cluster].ravel(), "b")
 			plt.legend(loc="upper left",bbox_to_anchor=(1,1))  
@@ -90,22 +88,16 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		plt.show()
 
 	#sil_score=sklearn_silhouette(two_dim_data, pred, metric="euclidean") #jaccard.	 
-	#print(sil_score)
-
-	# sil_score=silhouette_samples(two_dim_data, pred, metric="euclidean") # returns the silhouette scores for each sample.
-	# print(sil_score,statistics.mean(sil_score))
-
-	sil_score=tslearn_silhouette(two_dim_data, pred, metric="dtw") 
-	#print(sil_score)
-
+	sil_score=tslearn_silhouette(two_dim_data, pred, metric=distance_metric) 
 
 	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters}
 
 
-### Based on the default implementation, visualizes based on "euclidean".
-### Needs more customization.
-
 class Visualize_Silhouette(SilhouetteVisualizer):
+
+	"""
+	Inherits and overrides the fit method to include dtw visualization (uses tslearn's implementation.)
+	"""
 
 	def __init__(self,estimator,data,distance_metric="dtw"):
 
@@ -114,7 +106,6 @@ class Visualize_Silhouette(SilhouetteVisualizer):
 		self.data=data
 		super().__init__(estimator)
 
-
 	def fit(self):
 
 		self.n_samples_=self.data.shape[0]
@@ -122,23 +113,28 @@ class Visualize_Silhouette(SilhouetteVisualizer):
 		labels=self.estimator.fit_predict(self.data)
 		
 
-		### score is based on dtw, samples based on #sklearn euclidean.
-		### To do: to implement samples based on dynamic time warping.
 		self.silhouette_score_ = tslearn_silhouette(self.data, labels,metric=self.distance_metric)
-		self.silhouette_samples_ = silhouette_samples(self.data, labels)	
+		
+		if self.distance_metric=="dtw":
+
+			self.silhouette_samples_ = silhouette_samples(cdist_dtw(self.data), labels,metric="precomputed") # dtw matrix is passed as an argument.	
+		else:
+			self.silhouette_samples_ = silhouette_samples(self.data, labels,metric=self.distance_metric)
 
 		self.draw(labels)
+		
 		return self
 
 
-def visualize_silhoueete(model,data,plot=True):
+def visualize_silhoueete(model,data,distance_metric="dtw",plot=True):
 
-	vis=Visualize_Silhouette(model,data) # is_fitted
+	"""
+	wrapper-function for using Visualize_Silhouette class.
+	"""
+
+	vis=Visualize_Silhouette(model,data,distance_metric) 
 
 	vis.fit() # 2D.
 	if plot: vis.poof()
 
 
-
-if __name__ == '__main__':
-	help(SilhouetteVisualizer)

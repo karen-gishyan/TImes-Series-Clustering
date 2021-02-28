@@ -196,14 +196,15 @@ time.sleep(5)
 
 #print("Masters Data Evaluation")
 
-res=clustering(normalized_masters_diff,nclusters=2,plot=True,title="Master's Experiment")
+### the distance metric for clustering and silhouette do not need to match (might be logical to match).
+res=clustering(normalized_masters_diff,nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
 assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
-visualize_silhoueete(res["model"],res["two_dim_data"])
+visualize_silhoueete(res["model"],res["two_dim_data"],distance_metric="dtw")
 
 
 #print("PhD Data Evaluation")
 
-res=clustering(normalized_phd_diff,nclusters=8,plot=True,title="PhD Experiment")
+res=clustering(normalized_phd_diff,nclusters=8,plot=True,distance_metric="dtw",title="PhD Experiment")
 assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
-visualize_silhoueete(res["model"],res["two_dim_data"])
+visualize_silhoueete(res["model"],res["two_dim_data"],distance_metric="dtw")
 
