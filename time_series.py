@@ -39,9 +39,7 @@ class TimeSeries:
 		attribute_dict=self.decomposed_obj.__dict__
 		number_of_attributes=len(attribute_dict)
 
-
 		for i, (key, series) in enumerate(attribute_dict.items()):
-
 			
 			plt.subplot(number_of_attributes,1,i+1)	
 			plt.plot(series,label=key.replace("_","")) # without replace, legends not displayed.
@@ -60,8 +58,7 @@ class TimeSeries:
 		Conduct's a Dickey Fuller Test.
 		"""
 		
-		self.stationarity_test=adfuller(self.series,autolag=auto_lag,maxlag=max_lag,regression=regression)
-		
+		self.stationarity_test=adfuller(self.series,autolag=auto_lag,maxlag=max_lag,regression=regression)		
 		output=pd.Series(self.stationarity_test[0:4], index=['Test Statistic','p-value','Number of Lags Used','Number of Observations Used'])	
 		
 		for key, value in self.stationarity_test[4].items():

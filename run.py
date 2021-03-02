@@ -6,7 +6,7 @@
 ###  Check iteratively selecting ks. -✓
 ###  Evaluete using silhouette scores, and visualize. -✓
 
-from clustering import *
+from cluster import *
 from data import *
 from time_series import decompose_and_test_stationarity
 from sklearn.preprocessing import MinMaxScaler
@@ -43,18 +43,15 @@ master_cols=["Number of women entrants, persons","Number of men entrants, person
 ### decompose the columns names to words, change men -> man, women -> woman, rejoing into strings, rejoin into a list.
 
 m_cols=[]
-
 for string in master_cols:
 
 	new_col_name,renamed_list_of_strings=" ",[] # the list is renamed only if it cantains men or women.
-
 	for split_string in string.split():
 
 		if split_string=="women": split_string="woman"			
 		elif split_string=="men": split_string="man"
 			
-		renamed_list_of_strings.append(split_string)
-	
+		renamed_list_of_strings.append(split_string)	
 	m_cols.append(new_col_name.join(renamed_list_of_strings)) 
 
 master_limited,phd_limited=pd.DataFrame(),pd.DataFrame()
@@ -165,6 +162,11 @@ print("---")
 ### Determining the best k for clustering.
 ### With preprocessing, the silhoueete scores decrease.
 	
+
+# iterate=True
+# clustering(normalized_masters_diff)
+# sys.exit()
+
 k=10
 print("Masters data clustering results.")
 print("---")
@@ -173,8 +175,7 @@ for cluster in range(2,k+1):
 
 	
 	res=clustering(normalized_masters_diff,nclusters=cluster) # preprocess="min_max"
-	
-	assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
+	#assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 
@@ -186,25 +187,21 @@ print("---")
 for cluster in range(2,k+1):	
 	
 	res=clustering(normalized_phd_diff,nclusters=cluster) # preprocess="min_max"
-	assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
-
 
 time.sleep(5)
 
+
 ### Optimal clusters with silhouette scores with normalized datasets.
 
-#print("Masters Data Evaluation")
+vis=True
+### decorator call with arguments, for both master's and phd-second approach.
+clustering_decorator(vis,visualize_silhoueete,
+	distance_metric="dtw")(clustering)(normalized_masters_diff,
+	nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
 
-### the distance metric for clustering and silhouette do not need to match (might be logical to match).
-res=clustering(normalized_masters_diff,nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
-assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
-visualize_silhoueete(res["model"],res["two_dim_data"],distance_metric="dtw")
 
+clustering_decorator(vis,visualize_silhoueete,distance_metric="dtw")(clustering)(normalized_phd_diff,nclusters=8,
+	plot=True,distance_metric="dtw",title="PhD Experiment")
 
-#print("PhD Data Evaluation")
-
-res=clustering(normalized_phd_diff,nclusters=8,plot=True,distance_metric="dtw",title="PhD Experiment")
-assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
-visualize_silhoueete(res["model"],res["two_dim_data"],distance_metric="dtw")
 
