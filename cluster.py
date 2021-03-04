@@ -12,21 +12,21 @@ from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from yellowbrick.cluster import SilhouetteVisualizer
 from sklearn.metrics import silhouette_score as sklearn_silhouette, silhouette_samples
 from collections import defaultdict
-import datetime
+from typing import Optional, Dict, List,Callable
 
-def clustering_decorator(visualize=False,silhouette_visualizer=None,**silkwargs):	
+
+def clustering_decorator(visualize: bool =False,
+	silhouette_visualizer: Optional[str]=None,**silkwargs) -> Callable:	
+	
 	"""
-	Clustering decorator to check for assertion and visualize.
-	In the run.py for calling clustering during iteration, we did not need to import
-	clustering decorator. The need comes when we dynamically pass arguments, which is only possible
-	with the second equivalent approach of calling a decorator.
-
-	In the run.py, is applied with with two alternative versions.
+	Clustering decorator for the clustering function. Checks for assertion and 
+	checks for Silhouette visualization.
+	
 	"""
 	
-	def function_taker(function):
+	def function_taker(function: Callable) -> Callable:
 
-		def wrapper(*args,**kwargs):
+		def wrapper(*args,**kwargs)-> Dict:
 
 			result=function(*args,**kwargs)		
 			assert result["n_cols"]-1>result["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."				
@@ -41,28 +41,16 @@ def clustering_decorator(visualize=False,silhouette_visualizer=None,**silkwargs)
 
 
 @clustering_decorator()
-def clustering(data,ncols=None,nclusters=5,preprocess=None, 
-	distance_metric="dtw",plot=False,title=None,create_dataset_with_labels=False):
+
+def clustering(data,ncols: Optional[str]=None, nclusters: int =5,preprocess: Optional[str]=None, 
+	distance_metric: str="dtw",plot: bool=False,title: Optional[str]=None) -> Dict:
 
 	"""
-	Performs times series clustering, returns the silhouette score, data, n_cols and nclusters.
+	Performs times series clustering, 
+	returns a dictionary containing the model, silhouette score, data in 2D,
+	number of columns, number of clusters, and dictionary of lists of names for each cluster.
 
-	Parameters:
-	
-	data: pandas DataFrame.
-	ncols: int (default None)
-		Number of dataset columns to subset from o index.
-	nclusters: int (default: 5), optional
-		Number of clusters to form.
-
-	preprocess: str {"scale_mean_variance","min_max"},  optional
-		scale_mean_variance scales times series in each dimension to mean =0.0, std=1.0
-		min_max scales the times series between 0.0 and 1.0
-	
-	distance_metric: str ["dtw","euclidean"], (default: "dtw"), optional
-		the distance metric to be used between the series.	
 	"""
-
 
 	ts_list,names_list =[],[]
 	number_of_cols=data.shape[1]
@@ -72,10 +60,10 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None,
 		 
 	for label, series in data.iloc[:,:ncols].items(): # if ncols >number_of_cols pandas handles  it by taking max cols, but we make an assertion.
 
-		ts_list.append(series) # series become rows.
+		ts_list.append(series) 
 		names_list.append(label)
 
-	two_dim_data=np.array(ts_list) # columns to rows (samples for clustering.)
+	two_dim_data=np.array(ts_list) # columns to rows (samples for clustering)
 	#print(np.array(ts_list).shape)	
 	ts_data=to_time_series_dataset(two_dim_data)
 	
@@ -86,19 +74,20 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None,
 		ts_data=TimeSeriesScalerMinMax().fit_transform(ts_data)
 	
 	#rows=ts_data.shape[1]
-	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11) 
+	km=TimeSeriesKMeans(n_clusters=nclusters,metric=distance_metric,random_state=11) 
 	pred=km.fit_predict(ts_data) # predicts cluster index for each sample.d
+
 	
-	dict_of_lists=defaultdict(dict) # dict equivalent to lambda: {}
-	dict_of_dicts=defaultdict(list)  # list equivalent to lambda []
+	dict_of_dicts=defaultdict(dict) # dict equivalent to lambda: {}
+	dict_of_lists=defaultdict(list) # list equivalent to lambda:[]
 	
 	if plot:
 
-		fig=plt.figure(figsize=(7,7)) #figsize=(8,10)
+		fig=plt.figure(figsize=(7,7))
 
+		### shared x and y titles.
 		fig.text(0.5,0.011, "Time", ha="center", va="center")
 		fig.text(0.011,0.5, "Values", ha="center", va="center", rotation=90)
-		
 		
 		for cluster in range(nclusters):  
 			
@@ -108,10 +97,9 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None,
 				
 				series=ts_series.ravel()
 				series_label=names_list[i]
-		
-				if create_dataset_with_labels:
-					dict_of_lists[f" The columns for cluster are {cluster+1}"].append(series_label)
-					#dict_of_dicts[f" The columns and values for cluster are {cluster+1}"cluster].update({series_label:series})
+					
+				dict_of_lists[f" Cluster {cluster+1}"].append(series_label)
+				#dict_of_dicts[f" The columns and values for cluster {cluster+1} are"].update({series_label:series})
 				
 				plt.plot(data.index.to_pydatetime(),series,"k-", alpha=0.5) #,label=series_label  
 				
@@ -120,8 +108,8 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None,
 			### obtained to change the xaxis frequency.
 			ax=plt.gca()
 			ax.xaxis.set_major_locator(mdates.YearLocator(base=1)) 
-			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y')) #include only year.
-			plt.gcf().autofmt_xdate()	 # creates x axes seperately and rotates.
+			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y')) 
+			plt.gcf().autofmt_xdate()# creates x axes seperately and rotates.
 			
 			#plt.legend(loc="upper left",bbox_to_anchor=(1,1))  
 			plt.title("Cluster %d" % (cluster + 1))
@@ -138,15 +126,15 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None,
 class Visualize_Silhouette(SilhouetteVisualizer):
 
 	"""
-	Inherits and overrides the fit method to include dtw implementation.(uses tslearn's implementation.)
+	Inherits from SilhouetteVisualizer and
+	modifies the fit method to include dtw implementation.
 	"""
 
-	def __init__(self,estimator,data,distance_metric="dtw"):
+	def __init__(self,estimator,data,distance_metric: str="dtw"):
 
-		#self.estimator=estimator
 		self.distance_metric=distance_metric
 		self.data=data
-		super().__init__(estimator)
+		super().__init__(estimator) #calls the __init__ of the parent class.
 
 	def fit(self):
 
@@ -166,7 +154,7 @@ class Visualize_Silhouette(SilhouetteVisualizer):
 		return self
 
 
-def visualize_silhoueete(model,data,distance_metric="dtw",plot=True):
+def visualize_silhoueete(model,data,distance_metric: str="dtw",plot: Optional[str]=True):
 
 	"""
 	wrapper-function for using Visualize_Silhouette class.

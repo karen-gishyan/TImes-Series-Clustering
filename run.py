@@ -195,11 +195,26 @@ time.sleep(5)
 vis=True #for silhouette visualization.
 
 ### decorator call with arguments, for both master's and phd,second approach.
-clustering_decorator(vis,visualize_silhoueete,
+
+print("---")
+
+res=clustering_decorator(vis,visualize_silhoueete,
 	distance_metric="dtw")(clustering)(normalized_masters_diff,
 	nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
 
-clustering_decorator(vis,visualize_silhoueete,distance_metric="dtw")(clustering)(normalized_phd_diff,nclusters=8,
+rd=res["dict_of_cluster_names"]
+
+for cluster,columns in rd.items():
+	print("For Masters", cluster,"has {} series.".format(len(columns)))
+
+print("---")
+
+res=clustering_decorator(vis,visualize_silhoueete,distance_metric="dtw")(clustering)(normalized_phd_diff,nclusters=8,
 	plot=True,distance_metric="dtw",title="PhD Experiment")
+
+rd=res["dict_of_cluster_names"]
+
+for cluster,columns in rd.items():
+	print("For PhD", cluster,"has {} series.".format(len(columns)))
 
 

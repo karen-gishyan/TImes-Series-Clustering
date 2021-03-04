@@ -3,20 +3,16 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import os 
 import sys
+from typing import Optional, Dict, List,Callable
 
 
-def read_csv(path,save=False,save_title="output"):
+def read_csv(path: str,save: bool =False,save_title: str="output")-> Optional[str]:
+	
 	data=pd.read_csv(path,sep=";",skiprows=2) 
-	
 	data=data.set_index(data.columns[0]) # the variable names as indices.
-	data=data.transpose() # transposes the indexes and columns.
-	
+	data=data.transpose() 
 	
 	data.index=pd.DatetimeIndex(data.index,freq="AS")
-
-	### seting index manually. much more robust than the commented code above, which infers freq and only allows AS.
-	### however, as we deal with two datasets, DatetimeIndex is more preferable.
-	
 	#data.index=pd.date_range(start="2001-01-01",periods=19,freq="AS") 
 
 	if save:
@@ -26,7 +22,7 @@ def read_csv(path,save=False,save_title="output"):
 	return data
 
 
-def visualize_series(data, column_list=None,ncols=3):
+def visualize_series(data, column_list: Optional[str]=None,ncols: int=3)-> Optional[str]:
 	
 	"""
 	Plots the dataset columns.
