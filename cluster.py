@@ -11,15 +11,17 @@ from tslearn.clustering import silhouette_score as tslearn_silhouette
 from tslearn.preprocessing import TimeSeriesScalerMeanVariance
 from yellowbrick.cluster import SilhouetteVisualizer
 from sklearn.metrics import silhouette_score as sklearn_silhouette, silhouette_samples
+from collections import defaultdict
+import datetime
 
-
-### Advanced but beautiful decorator.
 def clustering_decorator(visualize=False,silhouette_visualizer=None,**silkwargs):	
 	"""
 	Clustering decorator to check for assertion and visualize.
 	In the run.py for calling clustering during iteration, we did not need to import
 	clustering decorator. The need comes when we dynamically pass arguments, which is only possible
 	with the second equivalent approach of calling a decorator.
+
+	In the run.py, is applied with with two alternative versions.
 	"""
 	
 	def function_taker(function):
@@ -34,12 +36,13 @@ def clustering_decorator(visualize=False,silhouette_visualizer=None,**silkwargs)
 
 			return result
 		return wrapper
-		
+
 	return function_taker
 
 
 @clustering_decorator()
-def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw",plot=False,title=None):
+def clustering(data,ncols=None,nclusters=5,preprocess=None, 
+	distance_metric="dtw",plot=False,title=None,create_dataset_with_labels=False):
 
 	"""
 	Performs times series clustering, returns the silhouette score, data, n_cols and nclusters.
@@ -60,6 +63,7 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		the distance metric to be used between the series.	
 	"""
 
+
 	ts_list,names_list =[],[]
 	number_of_cols=data.shape[1]
 
@@ -71,7 +75,7 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 		ts_list.append(series) # series become rows.
 		names_list.append(label)
 
-	two_dim_data=np.array(ts_list) 
+	two_dim_data=np.array(ts_list) # columns to rows (samples for clustering.)
 	#print(np.array(ts_list).shape)	
 	ts_data=to_time_series_dataset(two_dim_data)
 	
@@ -83,31 +87,52 @@ def clustering(data,ncols=None,nclusters=5,preprocess=None, distance_metric="dtw
 	
 	#rows=ts_data.shape[1]
 	km=TimeSeriesKMeans(n_clusters=nclusters,metric="dtw",random_state=11) 
-	pred=km.fit_predict(ts_data)
+	pred=km.fit_predict(ts_data) # predicts cluster index for each sample.d
+	
+	dict_of_lists=defaultdict(dict) # dict equivalent to lambda: {}
+	dict_of_dicts=defaultdict(list)  # list equivalent to lambda []
 	
 	if plot:
 
-		plt.figure()
+		fig=plt.figure(figsize=(7,7)) #figsize=(8,10)
+
+		fig.text(0.5,0.011, "Time", ha="center", va="center")
+		fig.text(0.011,0.5, "Values", ha="center", va="center", rotation=90)
+		
+		
 		for cluster in range(nclusters):  
 			
 			plt.subplot(nclusters, 1, cluster+1)	
-			for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.				
-				plt.plot(ts_series.ravel(),"k-", alpha=0.3,label=names_list[i]) 
-				#plt.plot(ts_series.ravel(),"k-", alpha=0.3) 
-
-			plt.plot(km.cluster_centers_[cluster].ravel(), "b")
-			plt.legend(loc="upper left",bbox_to_anchor=(1,1))  
-			# plt.xlim(0, rows)
 			
-			plt.title("Cluster %d" % (cluster + 1))
-		if title: plt.suptitle("{}".format(title))
+			for i,ts_series in zip(np.argwhere(pred == cluster).ravel(),ts_data[pred == cluster]): # which series belongs to which cluster.				
+				
+				series=ts_series.ravel()
+				series_label=names_list[i]
 		
-		plt.tight_layout()
+				if create_dataset_with_labels:
+					dict_of_lists[f" The columns for cluster are {cluster+1}"].append(series_label)
+					#dict_of_dicts[f" The columns and values for cluster are {cluster+1}"cluster].update({series_label:series})
+				
+				plt.plot(data.index.to_pydatetime(),series,"k-", alpha=0.5) #,label=series_label  
+				
+			plt.plot(data.index.to_pydatetime(),km.cluster_centers_[cluster].ravel(), "b")
+		
+			### obtained to change the xaxis frequency.
+			ax=plt.gca()
+			ax.xaxis.set_major_locator(mdates.YearLocator(base=1)) 
+			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y')) #include only year.
+			plt.gcf().autofmt_xdate()	 # creates x axes seperately and rotates.
+			
+			#plt.legend(loc="upper left",bbox_to_anchor=(1,1))  
+			plt.title("Cluster %d" % (cluster + 1))
+
+		if title: plt.suptitle("{}".format(title))
+		plt.tight_layout()	
 		plt.show()
 
 	#sil_score=sklearn_silhouette(two_dim_data, pred, metric="euclidean") #jaccard.	 
 	sil_score=tslearn_silhouette(two_dim_data, pred, metric=distance_metric) 
-	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters}
+	return {"model":km, "silhouette":sil_score,"two_dim_data":two_dim_data,"n_cols":ncols,"n_clusters":nclusters,"dict_of_cluster_names":dict_of_lists}
 
 
 class Visualize_Silhouette(SilhouetteVisualizer):

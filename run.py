@@ -76,16 +76,15 @@ for pcol in phd_cols:
 
 #print("Number of columns in the masters data is",len(master_limited.columns))
 #print("Number of columns in the phd data is", len(phd_limited.columns))
-
 	
 ### The variables are non stationary.
+
 #print("Stationarity test for the Masters Dataset")
 #print(decompose_and_test_stationarity(master_limited))
 
 
 #print("Stationarity test for the PhD Dataset")
 #print(decompose_and_test_stationarity(phd_limited))
-
 
 ### Differencing the series to period 1 to remove stationarity.
 masters_diff=master_limited.diff().dropna()
@@ -151,6 +150,7 @@ print("Final Masters and PhD  dataset shapes are {} and {}.".format(masters_diff
 ### Normalization does not change stationarity, so 2nd differencing was needed.
 
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
+
 #print(decompose_and_test_stationarity(normalized_masters_diff))
 
 normalized_phd_diff=(phd_diff-phd_diff.min())/(phd_diff.max()-phd_diff.min())
@@ -162,10 +162,6 @@ print("---")
 ### Determining the best k for clustering.
 ### With preprocessing, the silhoueete scores decrease.
 	
-
-# iterate=True
-# clustering(normalized_masters_diff)
-# sys.exit()
 
 k=10
 print("Masters data clustering results.")
@@ -186,7 +182,9 @@ print("---")
 
 for cluster in range(2,k+1):	
 	
-	res=clustering(normalized_phd_diff,nclusters=cluster) # preprocess="min_max"
+	### decorator applied with the first approach 
+	### (without passing to clustering decorator manually)
+	res=clustering(normalized_phd_diff,nclusters=cluster) 
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 time.sleep(5)
@@ -194,12 +192,12 @@ time.sleep(5)
 
 ### Optimal clusters with silhouette scores with normalized datasets.
 
-vis=True
-### decorator call with arguments, for both master's and phd-second approach.
+vis=True #for silhouette visualization.
+
+### decorator call with arguments, for both master's and phd,second approach.
 clustering_decorator(vis,visualize_silhoueete,
 	distance_metric="dtw")(clustering)(normalized_masters_diff,
 	nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
-
 
 clustering_decorator(vis,visualize_silhoueete,distance_metric="dtw")(clustering)(normalized_phd_diff,nclusters=8,
 	plot=True,distance_metric="dtw",title="PhD Experiment")
