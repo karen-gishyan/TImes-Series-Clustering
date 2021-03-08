@@ -13,9 +13,8 @@ from sklearn.preprocessing import MinMaxScaler
 import re
 import time
 
-masters_data=read_csv("datasets/masters.csv")
-phd_data=read_csv("datasets/phd.csv")
-
+masters_data=read_csv("datasets/masters_processed.csv")
+phd_data=read_csv("datasets/phd_processed.csv")
 
 ### removes trailing space before the comma.
 masters_data.columns=[re.sub('\\s*([,])s*', r'\1', mcol) for mcol in masters_data.columns]
@@ -25,6 +24,8 @@ phd_data.columns=[re.sub('\\s*([,])s*', r'\1', pcol) for pcol in phd_data.column
 masters_data.columns=[re.sub(' +', ' ', mcol) for mcol in masters_data.columns]
 phd_data.columns=[re.sub(' +', ' ', pcol) for pcol in phd_data.columns]
 
+# print(len(masters_data.columns))
+# print(len(phd_data.columns))
 
 ### list of needed master's columns, most of which exist in phd as well.
 ### We make sure all women are converted to woman and men to man in col names
@@ -41,11 +42,10 @@ master_cols=["Number of women entrants, persons","Number of men entrants, person
 "Number of paid training foreign woman students, persons","Number of paid training foreign man students, persons"]
 
 ### decompose the columns names to words, change men -> man, women -> woman, rejoing into strings, rejoin into a list.
-
 m_cols=[]
 for string in master_cols:
 
-	new_col_name,renamed_list_of_strings=" ",[] # the list is renamed only if it cantains men or women.
+	new_col_name,renamed_list_of_strings=" ",[]
 	for split_string in string.split():
 
 		if split_string=="women": split_string="woman"			
@@ -64,7 +64,7 @@ for  new_col,old_col in zip(m_cols,master_cols):
 ### finds the columns in the masters_data which are not present in the phd data.
 diff_list=[i for i in master_limited.columns if i not in phd_data.columns]
 
-### basically append all the column names which are the same as in masters (phd data may not contain certain master's columns.)
+### append all the column names which are the same as in masters (phd data may not contain certain master's columns.)
 phd_cols=[i for i in master_limited.columns if i not in diff_list]
 
 ### append two more columns which exist only in phd.
@@ -74,14 +74,13 @@ for pcol in phd_cols:
 	phd_limited[pcol]=phd_data[pcol]
 
 
-#print("Number of columns in the masters data is",len(master_limited.columns))
-#print("Number of columns in the phd data is", len(phd_limited.columns))
-	
+# print("Number of columns in the masters data is",len(master_limited.columns))
+# print("Number of columns in the phd data is", len(phd_limited.columns))
+
 ### The variables are non stationary.
 
 #print("Stationarity test for the Masters Dataset")
 #print(decompose_and_test_stationarity(master_limited))
-
 
 #print("Stationarity test for the PhD Dataset")
 #print(decompose_and_test_stationarity(phd_limited))
@@ -100,7 +99,6 @@ print("---")
 ### We loose observations, and need to drop a row for the stationary columns as well to be able to proceed with calculations.
 ### To account for negative values and for scaling, we do a Min-Max normalization.
 
-
 #print("Stationarity test for the Masters Dataset after Differencing")
 results_stationarity_masters=decompose_and_test_stationarity(masters_diff)
 non_stationary_masters_list=[i for i, value in enumerate(results_stationarity_masters.values()) if value >0.05]
@@ -116,9 +114,7 @@ non_stationary_phd_list=[i for i, value in enumerate(results_stationarity_phd.va
 subsetm=masters_diff.iloc[:,non_stationary_masters_list]
 subsetm=subsetm.diff().dropna() # 2002 year  is dropped.
 
-
 second_diff_masters_results=decompose_and_test_stationarity(subsetm) # only 1 column is not stationary after 2nd differencing.
-
 non_stationary_masters_second_diff_list=[i for i, value in enumerate(second_diff_masters_results.values()) if value >0.05]
 
 
@@ -161,17 +157,17 @@ print("---")
 
 ### Determining the best k for clustering.
 ### With preprocessing, the silhoueete scores decrease.
-	
 
+	
 k=10
 print("Masters data clustering results.")
 print("---")
 
 for cluster in range(2,k+1):
-
 	
-	res=clustering(normalized_masters_diff,nclusters=cluster) # preprocess="min_max"
-	#assert res["n_cols"]-1>res["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."
+	### decorator applied with the first approach 
+	### (without passing to clustering decorator manually)
+	res=clustering(normalized_masters_diff,nclusters=cluster,distance_metric="softdtw") # preprocess="min_max"
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 
@@ -179,42 +175,37 @@ print("---")
 print("PhD data clustering results.")
 print("---")
 
-
 for cluster in range(2,k+1):	
 	
-	### decorator applied with the first approach 
-	### (without passing to clustering decorator manually)
-	res=clustering(normalized_phd_diff,nclusters=cluster) 
+	res=clustering(normalized_phd_diff,nclusters=cluster,distance_metric="softdtw") 
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 time.sleep(5)
 
-
 ### Optimal clusters with silhouette scores with normalized datasets.
-
 vis=True #for silhouette visualization.
 
+print("---")
+
 ### decorator call with arguments, for both master's and phd,second approach.
-
-print("---")
-
+### Metrics do not need to be the same, but the same metric in genereal produces higher results.
 res=clustering_decorator(vis,visualize_silhoueete,
-	distance_metric="dtw")(clustering)(normalized_masters_diff,
-	nclusters=2,plot=True,distance_metric="dtw",title="Master's Experiment")
+	distance_metric="softdtw")(clustering)(normalized_masters_diff,
+	nclusters=2,plot=True,distance_metric="softdtw",title="Adjusted Time Series: Master's Dataset")
+
 
 rd=res["dict_of_cluster_names"]
 
+
 for cluster,columns in rd.items():
-	print("For Masters", cluster,"has {} series.".format(len(columns)))
+	print("For Masters :", cluster,"has {} series.".format(len(columns)))
 
 print("---")
 
-res=clustering_decorator(vis,visualize_silhoueete,distance_metric="dtw")(clustering)(normalized_phd_diff,nclusters=8,
-	plot=True,distance_metric="dtw",title="PhD Experiment")
+res=clustering_decorator(vis,visualize_silhoueete,distance_metric="softdtw")(clustering)(normalized_phd_diff,nclusters=3,
+	plot=True,distance_metric="softdtw",title="Adjusted Time Series: PhD Dataset")
 
 rd=res["dict_of_cluster_names"]
 
 for cluster,columns in rd.items():
-	print("For PhD", cluster,"has {} series.".format(len(columns)))
-
-
+	print("For PhD :", cluster,"has {} series.".format(len(columns)))

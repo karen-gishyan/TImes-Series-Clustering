@@ -1,20 +1,14 @@
-### To do
-
-[ ] Understand 
-https://tslearn.readthedocs.io/en/stable/gen_modules/metrics/tslearn.metrics.cdist_dtw.html#tslearn.metrics.cdist_dtw
-[ ] Update the examples in time-series.py the stationarity check.
-[ ] include typing and proper docstring.
-[ ] Site tslearn, maybe yellow-brick as well.
-[ ] Include the results for dtw and euclidean.
-
-
-### Done
-[X] Understand the metric function from 
-https://github.com/tslearn-team/tslearn/blob/a3cf3bf/tslearn/clustering/utils.py#L66-L197
-(if not string or none, assumes a callable for distance calculation.)
-[x] Add x and y series for the clustering plot.
-[x] Manually check if there are clusters which are empty for clusters which only have a blue line.
-[x] The silhouettes match the results (check one more time), but check the plots, to  make sure the right variables are correctly displayed next to each plot.
-[x] make a final check if the labels of the series are correct.
-
+### 
+To run the project, from your command line do:
+1. `git clone https://github.com/karen-gishyan/time-series-clustering.git`to an existing local directory or 
+download the zip and extract to  the same local directory (folder).
+2. Change the current working directory to your local directory by doing `cd path_to_your_local_dir` from the command line.
+3. If you have python installed and added in your system path, from the command line do:
+    1. `pip install requirements.txt`
+    2. `python run.py`   
+4. For checking a few sample decomposed time series plots, do:
+    1. `python time_series.py`
+5. Among other results, the following plots will be displayed.
+6. 	![alt text](images/clustering_masters.jpg)
+7. 	![alt text](images/clustering_phd.jpg)
 

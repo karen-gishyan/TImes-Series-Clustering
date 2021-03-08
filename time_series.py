@@ -1,11 +1,11 @@
 from data import * 
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
-
+import time
 
 class TimeSeries:
 
-	def __init__(self,series):
+	def __init__(self,series:pd.Series)-> Optional[str]:
 
 		"""
 		Parameters:
@@ -15,26 +15,25 @@ class TimeSeries:
 		self.name=series.name
 		
 
-	def decompose(self,method="additive"):
+	def decompose(self,**kwargs):
 
 		"""
 		Decomposes the times series into seasonal trend residual components.
 
 		Parameters:
+			**kwargs: keyword arguments for statsmodels.tsa.seasonal.seasonal_decompose, optional.
 
-		method: str {'additive','multiplicative'}, (default additive), optional
-			decompostion method.
+
+		period is inferred from index, alternatively can be set to freq=1, for yearly.
+		period =n means we get a cycle after every n observations.
+		https://robjhyndman.com/hyndsight/seasonal-periods/
+
 		"""
-
-		### period is inferred from index, alternatively can be set to freq=1, for yearly.
-		### period =n means we get a cycle after every n observations.
-		### https://robjhyndman.com/hyndsight/seasonal-periods/
-		self.decomposed_obj=seasonal_decompose(self.series,model=method,period=2) #statsmodels.tsa.seasonal.DecomposeResult class.
+		self.decomposed_obj=seasonal_decompose(self.series,**kwargs) 
 		return self	
 	
 
 	def plot_decomposition(self):
-
 
 		attribute_dict=self.decomposed_obj.__dict__
 		number_of_attributes=len(attribute_dict)
@@ -52,39 +51,41 @@ class TimeSeries:
 		return self
 
 
-	def test_stationarity(self,max_lag=None,regression='c',auto_lag='AIC'):
+	def test_stationarity(self,**kwargs)->Tuple[str,pd.Series]:
 		
 		"""
-		Conduct's a Dickey Fuller Test.
+		Conduct's a Dickey Fuller Test.	
+		Parameters
+			**kwargs: keyword arguments for statsmodels.tsa.stattools.adfuller,optional 
 		"""
 		
-		self.stationarity_test=adfuller(self.series,autolag=auto_lag,maxlag=max_lag,regression=regression)		
+		self.stationarity_test=adfuller(self.series,**kwargs)		
 		output=pd.Series(self.stationarity_test[0:4], index=['Test Statistic','p-value','Number of Lags Used','Number of Observations Used'])	
 		
 		for key, value in self.stationarity_test[4].items():
 			output["Critical Value {}".format(key)]=value
 		
-		return output
+		return (self.name, output)
 
 
-def decompose_and_test_stationarity(df,ncols=None,plot=False):
+def decompose_and_test_stationarity(df,ncols:Optional[str]=None,plot:bool=False,**kwargs)->dict:
 	
 	"""
-	Returning the P values of stationary for each columns.
-	P-value of more than 5% indicates non-stationarity,
+	Wrapper function for performing decomposition.
+
+	Parameters
+		df: pandas DataFrame.
+		**kwargs: statsmodels.tsa.seasonal.seasonal_decompose keyword arguments, optional.
+		
 	"""
 
 	stationarity_dict={}
 	for index, column in enumerate(df):
 
 		pts=TimeSeries(df[column])	
-		if plot: pts.decompose(method="additive").plot_decomposition()
+		if plot: pts.decompose(**kwargs).plot_decomposition() 
 		
-		# print(column)
-		# print(pts.test_stationarity())
-		# print("-------")
-
-		p_value=pts.test_stationarity()["p-value"] # Only for p values.
+		p_value=pts.test_stationarity()[1]["p-value"]
 		stationarity_dict["{}. P-value for {} column".format(index, column)]=p_value
 		
 		if ncols:
@@ -95,15 +96,28 @@ def decompose_and_test_stationarity(df,ncols=None,plot=False):
 	
 
 if __name__	=="__main__":
-	
-	masters_data=read_csv("datasets/masters.csv")
-	
-	#decompose_and_test_stationarity(masters_data,ncols=1,plot=True)
-	ts=TimeSeries(masters_data.iloc[:,7])
-	#print(ts.test_stationarity())
 
-	### with periods= 2, our residuals demonstrate the best stationarity.
-	sample=ts.decompose()	
-	residuals=sample.decomposed_obj.resid.dropna()
-	print(TimeSeries(residuals).test_stationarity()) 	
-	#TimeSeries(residuals).decompose().plot_decomposition()s
+	"""
+	Sample columns for visualizing decomposition.
+	"""
+	
+	masters_data=pd.read_csv("datasets/norm_masters.csv")
+	masters_data.rename(columns={"Unnamed: 0":'Index'},inplace=True)
+	masters_data.set_index("Index",inplace=True)
+	masters_data.index=pd.DatetimeIndex(masters_data.index,freq="AS")
+
+	sample_decompose_list=["Number of woman entrants, persons","Number of man entrants, persons",
+	"Number of state order training woman entrants, persons","Number of state order training man entrants, persons",
+	"Number of state order training woman entrants, persons"]	
+	
+	for name in sample_decompose_list:
+		ts=masters_data[name]
+		ts_obj=TimeSeries(ts).decompose(period=3).plot_decomposition()
+
+		tuple_=ts_obj.test_stationarity(regression='c') # all are stationary becauuse we use the final masters_dataframe.		
+		print(tuple_[0])
+		print(tuple_[1])
+		time.sleep(1)
+
+
+

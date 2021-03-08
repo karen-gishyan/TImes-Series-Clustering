@@ -1,0 +1,7 @@
+yellowbrick==1.2
+tslearn==0.4.1
+numpy==1.19.5
+statsmodels==0.12.1
+matplotlib==3.3.0
+pandas==1.0.5
+scikit_learn==0.24.1
