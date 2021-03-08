@@ -9,6 +9,6 @@ download the zip and extract to  the same local directory (folder).
 4. For checking a few sample decomposed time series plots, do:
     1. `python time_series.py`
 5. Among other results, the following plots will be displayed.
-6. 	![alt text](images/clustering_masters.jpg)
-7. 	![alt text](images/clustering_phd.jpg)
+6. 	![alt text](images/clustering_masters.png)
+7. 	![alt text](images/clustering_phd.png)
 
