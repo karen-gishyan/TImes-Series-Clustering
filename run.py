@@ -13,8 +13,8 @@ from sklearn.preprocessing import MinMaxScaler
 import re
 import time
 
-masters_data=read_csv("datasets/masters_processed.csv")
-phd_data=read_csv("datasets/phd_processed.csv")
+masters_data=read_csv("datasets/masters_original.csv")
+phd_data=read_csv("datasets/phd_original.csv")
 
 ### removes trailing space before the comma.
 masters_data.columns=[re.sub('\\s*([,])s*', r'\1', mcol) for mcol in masters_data.columns]
@@ -72,7 +72,6 @@ phd_cols.append(["Men who had defended thesis, persons","Women who had defended 
 
 for pcol in phd_cols:
 	phd_limited[pcol]=phd_data[pcol]
-
 
 # print("Number of columns in the masters data is",len(master_limited.columns))
 # print("Number of columns in the phd data is", len(phd_limited.columns))
@@ -208,4 +207,4 @@ res=clustering_decorator(vis,visualize_silhoueete,distance_metric="softdtw")(clu
 rd=res["dict_of_cluster_names"]
 
 for cluster,columns in rd.items():
-	print("For PhD :", cluster,"has {} series.".format(len(columns)))
+	print("For PhD :", cluster,"has {} series.".format(len(columns)))	

@@ -100,24 +100,42 @@ if __name__	=="__main__":
 	"""
 	Sample columns for visualizing decomposition.
 	"""
+	final_dataset=False
 	
-	masters_data=pd.read_csv("datasets/norm_masters.csv")
-	masters_data.rename(columns={"Unnamed: 0":'Index'},inplace=True)
-	masters_data.set_index("Index",inplace=True)
-	masters_data.index=pd.DatetimeIndex(masters_data.index,freq="AS")
+	if final_dataset: 
+		masters_data=pd.read_csv("datasets/norm_masters.csv")
 
-	sample_decompose_list=["Number of woman entrants, persons","Number of man entrants, persons",
-	"Number of state order training woman entrants, persons","Number of state order training man entrants, persons",
-	"Number of state order training woman entrants, persons"]	
+	else:
+		#Preprocessed data before differencing.
+		masters_data=pd.read_csv("datasets/masters_before_diff.csv")
 	
+		masters_data.rename(columns={"Unnamed: 0":'Index'},inplace=True)
+		masters_data.set_index("Index",inplace=True)
+		masters_data.index=pd.DatetimeIndex(masters_data.index,freq="AS")
+
+		sample_decompose_list=["Number of woman entrants, persons","Number of man entrants, persons",
+		"Number of state order training woman entrants, persons","Number of state order training man entrants, persons",
+		"Number of state order training woman entrants, persons"]	
+
 	for name in sample_decompose_list:
 		ts=masters_data[name]
-		ts_obj=TimeSeries(ts).decompose(period=3).plot_decomposition()
-
+		
+		ts_obj=TimeSeries(ts).decompose(period=2).plot_decomposition() 
 		tuple_=ts_obj.test_stationarity(regression='c') # all are stationary becauuse we use the final masters_dataframe.		
+
 		print(tuple_[0])
 		print(tuple_[1])
 		time.sleep(1)
+
+		### decomposoition period does not affect stationarity results.
+		### To check which period is the best for stationairty, residuals can be plotted instead
+		### of the whole series (comment out the code bellow.)
+
+		### stationairty results with period two are better.
+		# resid_obj=TimeSeries(ts_obj.decomposed_obj.resid.dropna()).test_stationarity()
+		# print(resid_obj[0])
+		# print(resid_obj[1])
+		# time.sleep(1)
 
 
 
