@@ -145,15 +145,15 @@ print("Final Masters and PhD  dataset shapes are {} and {}.".format(masters_diff
 ### Normalization does not change stationarity, so 2nd differencing was needed.
 
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
-
 #print(decompose_and_test_stationarity(normalized_masters_diff))
 
 normalized_phd_diff=(phd_diff-phd_diff.min())/(phd_diff.max()-phd_diff.min())
+
 #print(decompose_and_test_stationarity(normalized_phd_diff))
 
 print("Final Masters and PhD shapes in the normalized datasets are {} and {}.".format(normalized_masters_diff.shape,normalized_phd_diff.shape))
 print("---")
-
+### In the clustering, these normalized masters and phd datasets are again transposed.
 ### Determining the best k for clustering.
 ### With preprocessing, the silhoueete scores decrease.
 
@@ -166,7 +166,7 @@ for cluster in range(2,k+1):
 	
 	### decorator applied with the first approach 
 	### (without passing to clustering decorator manually)
-	res=clustering(normalized_masters_diff,nclusters=cluster,distance_metric="softdtw") # preprocess="min_max"
+	res=clustering(normalized_masters_diff,nclusters=cluster,distance_metric="softdtw",pca=False) # preprocess="min_max"
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 
@@ -176,7 +176,7 @@ print("---")
 
 for cluster in range(2,k+1):	
 	
-	res=clustering(normalized_phd_diff,nclusters=cluster,distance_metric="softdtw") 
+	res=clustering(normalized_phd_diff,nclusters=cluster,distance_metric="softdtw",pca=False) 
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 time.sleep(5)
@@ -185,6 +185,7 @@ time.sleep(5)
 vis=True #for silhouette visualization.
 
 print("---")
+
 
 ### decorator call with arguments, for both master's and phd,second approach.
 ### Metrics do not need to be the same, but the same metric in genereal produces higher results.

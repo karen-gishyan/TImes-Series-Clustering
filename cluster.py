@@ -4,6 +4,7 @@ warnings.filterwarnings("ignore",category=UserWarning)
 from data import *
 import numpy as np
 import statistics
+from sklearn.decomposition import PCA
 from tslearn.utils import to_time_series,to_time_series_dataset
 from tslearn.metrics import cdist_dtw, cdist_soft_dtw_normalized
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
@@ -46,7 +47,7 @@ def clustering_decorator(visualize: bool =False,
 @clustering_decorator()
 
 def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,preprocess: Optional[str]=None, 
-	distance_metric: str="dtw",plot: bool=False,title: Optional[str]=None) -> Dict:
+	distance_metric: str="dtw",plot: bool=False,title: Optional[str]=None,pca:bool=False) -> Dict:
 
 	"""
 	Performs times series clustering, 
@@ -66,7 +67,11 @@ def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,p
 		names_list.append(label)
 
 	two_dim_data=np.array(ts_list) # columns to rows (samples for clustering)
+
 	#print(np.array(ts_list).shape)	
+	if pca:
+		two_dim_data=PCA(10).fit_transform(two_dim_data) # 10 is a sample argument, PCA is more of a demo procedure.
+
 	ts_data=to_time_series_dataset(two_dim_data)
 	
 	if preprocess=="scale_mean_variance": 
@@ -75,6 +80,7 @@ def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,p
 	elif preprocess=="min_max":
 		ts_data=TimeSeriesScalerMinMax().fit_transform(ts_data)
 	
+
 	km=TimeSeriesKMeans(n_clusters=nclusters,metric=distance_metric,random_state=11) 
 	pred=km.fit_predict(ts_data) # predicts cluster index for each sample.
 
@@ -100,13 +106,19 @@ def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,p
 					
 				dict_of_lists[f" Cluster {cluster+1}"].append(series_label)
 				#dict_of_dicts[f" The columns and values for cluster {cluster+1} are"].update({series_label:series})
+				if pca:
+					plt.plot(series,"k-", alpha=0.5,label=series_label) #,label=series_label  	
 				
-				plt.plot(data.index.to_pydatetime(),series,"k-", alpha=0.5,label=series_label) #,label=series_label  
-					
-
-			plt.plot(data.index.to_pydatetime(),km.cluster_centers_[cluster].ravel(), "b")
+				else:
+					plt.plot(data.index.to_pydatetime(),series,"k-", alpha=0.5,label=series_label) # x axis not included, as time dimension is reduced from PCA.
 			
+			if pca:
+				plt.plot(km.cluster_centers_[cluster].ravel(), "b") 
+			
+			else:
+				plt.plot(data.index.to_pydatetime(),km.cluster_centers_[cluster].ravel(), "b")
 			### obtained to change the xaxis frequency.
+			
 			ax=plt.gca()
 			ax.xaxis.set_major_locator(mdates.YearLocator(base=1)) 
 			ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y')) 
