@@ -117,7 +117,13 @@ second_diff_masters_results=decompose_and_test_stationarity(subsetm) # only 1 co
 non_stationary_masters_second_diff_list=[i for i, value in enumerate(second_diff_masters_results.values()) if value >0.05]
 
 
+
+cols=list(subsetm.iloc[:,non_stationary_masters_second_diff_list].columns)
+master_limited.drop(cols,axis=1,inplace=True)
+
 ### The column which renamed non-stationry after second differencing was dropped.
+
+#print(master_limited.columns)
 subsetm.drop(subsetm.columns[non_stationary_masters_second_diff_list],axis=1,inplace=True)
 
 masters_diff.drop(masters_diff.columns[non_stationary_masters_list],axis=1,inplace=True)
@@ -131,6 +137,10 @@ second_diff_phd_results=decompose_and_test_stationarity(subsetp)
 non_stationary_phd_second_diff_list=[i for i, value in enumerate(second_diff_phd_results.values()) if value >0.05]
 
 
+### removing non stationary columns from the original phd dataset.
+cols=list(subsetp.iloc[:,non_stationary_phd_second_diff_list].columns)
+phd_limited.drop(cols,axis=1,inplace=True)
+
 # The columns which remain non-stationary after second differencing are removed.
 subsetp.drop(subsetp.columns[non_stationary_phd_second_diff_list],axis=1,inplace=True)
 
@@ -143,6 +153,16 @@ print("Final Masters and PhD  dataset shapes are {} and {}.".format(masters_diff
 ### Column wise min-max normalization from 0 to 1.
 ### The decomposition results stay the same after normalization.
 ### Normalization does not change stationarity, so 2nd differencing was needed.
+
+### if true, removes non-stationary columns from the original.
+### aims to see if differencing helps in increaseing silhouette score, but it does not.
+differenced_dataasets=False 
+if differenced_dataasets:
+	
+	assert len(master_limited.columns)==len(masters_diff.columns)
+	assert len(phd_limited.columns)==len(phd_diff.columns)
+	masters_diff=master_limited
+	phd_diff=phd_limited
 
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
 #print(decompose_and_test_stationarity(normalized_masters_diff))
