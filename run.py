@@ -117,7 +117,6 @@ second_diff_masters_results=decompose_and_test_stationarity(subsetm) # only 1 co
 non_stationary_masters_second_diff_list=[i for i, value in enumerate(second_diff_masters_results.values()) if value >0.05]
 
 
-
 cols=list(subsetm.iloc[:,non_stationary_masters_second_diff_list].columns)
 master_limited.drop(cols,axis=1,inplace=True)
 
@@ -156,8 +155,8 @@ print("Final Masters and PhD  dataset shapes are {} and {}.".format(masters_diff
 
 ### if true, removes non-stationary columns from the original.
 ### aims to see if differencing helps in increaseing silhouette score, but it does not.
-differenced_dataasets=False 
-if differenced_dataasets:
+undifferenced_dataasets=True 
+if undifferenced_dataasets:
 	
 	assert len(master_limited.columns)==len(masters_diff.columns)
 	assert len(phd_limited.columns)==len(phd_diff.columns)
