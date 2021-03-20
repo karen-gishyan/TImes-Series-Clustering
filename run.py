@@ -8,10 +8,13 @@
 
 from cluster import *
 from data import *
-from time_series import decompose_and_test_stationarity
+import seaborn as sns
+from statsmodels.tsa.seasonal import STL
+from time_series import decompose_and_test_stationarity, TimeSeries
 from sklearn.preprocessing import MinMaxScaler
 import re
 import time
+
 
 masters_data=read_csv("datasets/masters_original.csv")
 phd_data=read_csv("datasets/phd_original.csv")
@@ -155,13 +158,85 @@ print("Final Masters and PhD  dataset shapes are {} and {}.".format(masters_diff
 
 ### if true, removes non-stationary columns from the original.
 ### aims to see if differencing helps in increaseing silhouette score, but it does not.
-undifferenced_dataasets=True 
+
+
+# sns.heatmap(master_limited.corr(),annot=True)
+# plt.show()
+# sns.heatmap(masters_diff.corr(),annot=True)
+# plt.show()
+
+undifferenced_dataasets=False #default differenced.
 if undifferenced_dataasets:
 	
 	assert len(master_limited.columns)==len(masters_diff.columns)
 	assert len(phd_limited.columns)==len(phd_diff.columns)
 	masters_diff=master_limited
 	phd_diff=phd_limited
+
+
+### STL Decomposition.
+stl_decompose=False
+
+stl_decomposed_masters_df={}
+for name, series in master_limited.iteritems():
+
+	res=STL(series,period=2).fit()
+	t=TimeSeries(pd.Series(res.resid)).test_stationarity()
+	# print(t[0])
+	# print(t[1])
+	# time.sleep(1)
+	stl_decomposed_masters_df.update({name:res.resid})
+
+
+
+stl_decomposed_masters_df=pd.DataFrame.from_dict(stl_decomposed_masters_df)
+
+stl_decomposed_phd_df={}
+
+for name, series in phd_limited.iteritems():
+
+	res=STL(series,period=2).fit()
+	t=TimeSeries(pd.Series(res.resid)).test_stationarity()
+	stl_decomposed_phd_df.update({name:res.resid})
+
+stl_decomposed_phd_df=pd.DataFrame.from_dict(stl_decomposed_phd_df)
+
+### Seasonal Decomposition.
+seasonal_decomposed_masters_df={}
+for name, series in master_limited.iteritems():
+
+	ts_obj=TimeSeries(series).decompose(period=2)
+	res=ts_obj.decomposed_obj.resid.dropna()
+	seasonal_decomposed_masters_df.update({name:res})
+
+seasonal_decomposed_masters_df=pd.DataFrame.from_dict(seasonal_decomposed_masters_df)
+
+seasonal_decomposed_phd_df={}
+
+for name, series in phd_limited.iteritems():
+
+	ts_obj=TimeSeries(series).decompose(period=2)
+	res=ts_obj.decomposed_obj.resid.dropna()
+	t=TimeSeries(res).test_stationarity()
+	#print(t[0]) 
+	#print(t[1])
+	#time.sleep(1)
+	seasonal_decomposed_phd_df.update({name:res})
+
+seasonal_decomposed_phd_df=pd.DataFrame.from_dict(seasonal_decomposed_phd_df)
+
+###
+seasonal_decompose=True
+
+if seasonal_decompose:
+	masters_diff=seasonal_decomposed_masters_df
+	phd_diff=seasonal_decomposed_phd_df
+
+if stl_decompose:
+
+	masters_diff=stl_decomposed_masters_df
+	phd_diff=stl_decomposed_phd_df
+
 
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
 #print(decompose_and_test_stationarity(normalized_masters_diff))
