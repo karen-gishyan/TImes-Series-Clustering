@@ -9,7 +9,7 @@ from tslearn.utils import to_time_series,to_time_series_dataset
 from tslearn.metrics import cdist_dtw, cdist_soft_dtw_normalized
 from tslearn.clustering import TimeSeriesKMeans, KernelKMeans
 from tslearn.clustering import silhouette_score as tslearn_silhouette
-from tslearn.preprocessing import TimeSeriesScalerMeanVariance
+from tslearn.preprocessing import TimeSeriesScalerMeanVariance,TimeSeriesScalerMinMax
 from yellowbrick.cluster import SilhouetteVisualizer
 from sklearn.metrics import silhouette_score as sklearn_silhouette, silhouette_samples
 from collections import defaultdict
@@ -32,8 +32,8 @@ def clustering_decorator(visualize: bool =False,
 				  *args:  arguments of the clustering() function.
 				**kwargs: keyword arguments of the clustering() function, optional.
 			"""
-			result=function(*args,**kwargs)		
-			assert result["n_cols"]-1>result["n_clusters"], "Number of columns should be at least by 2 more than the maximum cluster number."				
+			
+			result=function(*args,**kwargs)						
 			
 			if visualize:
 				silhouette_visualizer(result["model"],result["two_dim_data"],**silkwargs)
@@ -60,6 +60,8 @@ def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,p
 
 	if not ncols: ncols= number_of_cols
 	else: assert ncols< number_of_cols
+
+	assert ncols>nclusters, "Number of series should be at least by 1 more than clusters."
 		 
 	for label, series in data.iloc[:,:ncols].items(): # if ncols >number_of_cols pandas handles it by taking max cols.
 
@@ -70,7 +72,15 @@ def clustering(data: pd.DataFrame,ncols: Optional[str]=None, nclusters: int =5,p
 
 	#print(np.array(ts_list).shape)	
 	if pca:
-		two_dim_data=PCA(10).fit_transform(two_dim_data) # 10 is a sample argument, PCA is more of a demo procedure.
+		two_dim_data=PCA(n_components=6).fit_transform(two_dim_data) # 10 is a sample argument, PCA is more of a demo procedure.
+		
+		# pca = PCA().fit(two_dim_data)
+		# print(len(np.cumsum(pca.explained_variance_ratio_)))
+		# plt.plot(np.cumsum(pca.explained_variance_ratio_))
+		# plt.xlabel('Number of components')
+		# plt.ylabel('Cumulative explained variance');
+		# plt.show()
+		# sys.exit()
 
 	ts_data=to_time_series_dataset(two_dim_data)
 	

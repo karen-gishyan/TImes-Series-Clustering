@@ -1,6 +1,8 @@
 from data import * 
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
+from statsmodels.tsa.seasonal import STL
+
 import time
 
 class TimeSeries:
@@ -15,12 +17,13 @@ class TimeSeries:
 		self.name=series.name
 		
 
-	def decompose(self,**kwargs):
+	def decompose(self,type: str="seasonal",**kwargs):
 
 		"""
 		Decomposes the times series into seasonal trend residual components.
 
 		Parameters:
+			type: type of decomposition, either 'seasonal' or 'stl', optional.
 			**kwargs: keyword arguments for statsmodels.tsa.seasonal.seasonal_decompose, optional.
 
 
@@ -29,7 +32,15 @@ class TimeSeries:
 		https://robjhyndman.com/hyndsight/seasonal-periods/
 
 		"""
-		self.decomposed_obj=seasonal_decompose(self.series,**kwargs) 
+		if type=="seasonal":
+			self.decomposed_obj=seasonal_decompose(self.series,**kwargs) 
+		
+		elif type=="stl":
+			self.decomposed_obj=STL(self.series,**kwargs).fit()
+		
+		else:
+			print("Please check the type: either 'seasonal' or 'stl'.")
+			raise ValueError			
 		return self	
 	
 
@@ -68,10 +79,11 @@ class TimeSeries:
 		return (self.name, output)
 
 
-def decompose_and_test_stationarity(df,ncols:Optional[str]=None,plot:bool=False,**kwargs)->dict:
+def test_stationarity(df,ncols:Optional[str]=None,plot:bool=False,**kwargs)->dict:
 	
 	"""
-	Wrapper function for performing decomposition.
+	Wrapper function for testing stationity.
+	Decomposition is performed only if plot is set to True.
 
 	Parameters
 		df: pandas DataFrame.
@@ -99,6 +111,7 @@ if __name__	=="__main__":
 
 	"""
 	Sample columns for visualizing decomposition.
+	
 	"""
 	final_dataset=False
 	
