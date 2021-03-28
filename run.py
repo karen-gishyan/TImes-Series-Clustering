@@ -1,7 +1,7 @@
 ###  Main procedure.
 ###  Check decomposition, stationarity. -✓
 ###  Check decompostion, stationarity relation, do series transformation if needed. -✓ 
-###  Check dim reduction.
+###  Check dim reduction.-✓
 ###  Check standardization.-✓
 ###  Check iteratively selecting ks. -✓
 ###  Evaluete using silhouette scores, and visualize. -✓
@@ -9,8 +9,7 @@
 from cluster import *
 from data import *
 import seaborn as sns
-from statsmodels.tsa.seasonal import STL
-from time_series import decompose_and_test_stationarity, TimeSeries
+from time_series import test_stationarity, TimeSeries
 from sklearn.preprocessing import MinMaxScaler
 import re
 import time
@@ -27,8 +26,6 @@ phd_data.columns=[re.sub('\\s*([,])s*', r'\1', pcol) for pcol in phd_data.column
 masters_data.columns=[re.sub(' +', ' ', mcol) for mcol in masters_data.columns]
 phd_data.columns=[re.sub(' +', ' ', pcol) for pcol in phd_data.columns]
 
-# print(len(masters_data.columns))
-# print(len(phd_data.columns))
 
 ### list of needed master's columns, most of which exist in phd as well.
 ### We make sure all women are converted to woman and men to man in col names
@@ -67,48 +64,45 @@ for  new_col,old_col in zip(m_cols,master_cols):
 ### finds the columns in the masters_data which are not present in the phd data.
 diff_list=[i for i in master_limited.columns if i not in phd_data.columns]
 
-### append all the column names which are the same as in masters (phd data may not contain certain master's columns.)
-phd_cols=[i for i in master_limited.columns if i not in diff_list]
+master_limited.drop(diff_list,axis=1,inplace=True)
 
-### append two more columns which exist only in phd.
-phd_cols.append(["Men who had defended thesis, persons","Women who had defended thesis, persons"])
+phd_cols=master_limited.columns
+
 
 for pcol in phd_cols:
 	phd_limited[pcol]=phd_data[pcol]
 
-# print("Number of columns in the masters data is",len(master_limited.columns))
-# print("Number of columns in the phd data is", len(phd_limited.columns))
 
-### The variables are non stationary.
+assert len(master_limited.columns)==len(phd_limited.columns)
 
-#print("Stationarity test for the Masters Dataset")
-#print(decompose_and_test_stationarity(master_limited))
 
-#print("Stationarity test for the PhD Dataset")
-#print(decompose_and_test_stationarity(phd_limited))
+print("Stationarity test for the Masters Dataset")
+
+#print(test_stationarity(master_limited))
+
+print("Stationarity test for the PhD Dataset")
+#print(test_stationarity(phd_limited))
+
+
 
 ### Differencing the series to period 1 to remove stationarity.
 masters_diff=master_limited.diff().dropna()
 phd_diff=phd_limited.diff().dropna()
 
 
-print("Number of rows in Masters before and after differencing is {} and {}.".format(master_limited.shape[0],masters_diff.shape[0]))
+print("Number of rows in Masters before and after idfferencing is {} and {}.".format(master_limited.shape[0],masters_diff.shape[0]))
 print("Number of rows in PhD before and after differencing is {} and {}.".format(phd_limited.shape[0],phd_diff.shape[0]))
 print("---")
 
-### Most of the series become stationary, but negative values are introduced.
-### We check for the columns which still are non-stationary and conduct a second differencing.
-### We loose observations, and need to drop a row for the stationary columns as well to be able to proceed with calculations.
-### To account for negative values and for scaling, we do a Min-Max normalization.
 
 #print("Stationarity test for the Masters Dataset after Differencing")
-results_stationarity_masters=decompose_and_test_stationarity(masters_diff)
-non_stationary_masters_list=[i for i, value in enumerate(results_stationarity_masters.values()) if value >0.05]
+first_order_stationary_masters=test_stationarity(masters_diff)
+print(first_order_stationary_masters)
 
-
-#print("Stationarity test for the PhD Dataset after Differencing")
-results_stationarity_phd=decompose_and_test_stationarity(phd_diff)
-non_stationary_phd_list=[i for i, value in enumerate(results_stationarity_phd.values()) if value >0.05]
+print("Stationarity test for the PhD Dataset after Differencing")
+first_order_stationary_phd=test_stationarity(phd_diff)
+print(first_order_stationary_phd)
+sys.exit()
 
 ### Finding non-stationary columns after 2nd differencing.
 
@@ -121,6 +115,7 @@ non_stationary_masters_second_diff_list=[i for i, value in enumerate(second_diff
 
 
 cols=list(subsetm.iloc[:,non_stationary_masters_second_diff_list].columns)
+
 master_limited.drop(cols,axis=1,inplace=True)
 
 ### The column which renamed non-stationry after second differencing was dropped.
@@ -175,68 +170,70 @@ if undifferenced_dataasets:
 
 
 ### STL Decomposition.
-stl_decompose=False
+# stl_decompose=False
+# seasonal_decompose=False
 
-stl_decomposed_masters_df={}
-for name, series in master_limited.iteritems():
+# stl_decomposed_masters_df={}
+# for name, series in master_limited.iteritems():
 
-	res=STL(series,period=2).fit()
-	t=TimeSeries(pd.Series(res.resid)).test_stationarity()
-	# print(t[0])
-	# print(t[1])
-	# time.sleep(1)
-	stl_decomposed_masters_df.update({name:res.resid})
+# 	ts_obj=TimeSeries(series).decompose(type='stl',period=7)
+# 	res=ts_obj.decomposed_obj.resid.dropna()
+# 	t=TimeSeries(res).test_stationarity()
+# 	# print(t[0])
+# 	# print(t[1])
+# 	# time.sleep(1)
+# 	stl_decomposed_masters_df.update({name:res})
 
 
 
-stl_decomposed_masters_df=pd.DataFrame.from_dict(stl_decomposed_masters_df)
+# stl_decomposed_masters_df=pd.DataFrame.from_dict(stl_decomposed_masters_df)
 
-stl_decomposed_phd_df={}
+# stl_decomposed_phd_df={}
 
-for name, series in phd_limited.iteritems():
+# for name, series in phd_limited.iteritems():
 
-	res=STL(series,period=2).fit()
-	t=TimeSeries(pd.Series(res.resid)).test_stationarity()
-	stl_decomposed_phd_df.update({name:res.resid})
+# 	ts_obj=TimeSeries(series).decompose(type='stl',period=2)
+# 	res=ts_obj.decomposed_obj.resid.dropna()
+# 	stl_decomposed_phd_df.update({name:res})
 
-stl_decomposed_phd_df=pd.DataFrame.from_dict(stl_decomposed_phd_df)
+# stl_decomposed_phd_df=pd.DataFrame.from_dict(stl_decomposed_phd_df)
 
-### Seasonal Decomposition.
-seasonal_decomposed_masters_df={}
-for name, series in master_limited.iteritems():
+# ### Seasonal Decomposition.
+# seasonal_decomposed_masters_df={}
+# for name, series in master_limited.iteritems():
 
-	ts_obj=TimeSeries(series).decompose(period=2)
-	res=ts_obj.decomposed_obj.resid.dropna()
-	seasonal_decomposed_masters_df.update({name:res})
+# 	ts_obj=TimeSeries(series).decompose(period=2)
+# 	res=ts_obj.decomposed_obj.resid.dropna()
+# 	seasonal_decomposed_masters_df.update({name:res})
 
-seasonal_decomposed_masters_df=pd.DataFrame.from_dict(seasonal_decomposed_masters_df)
+# seasonal_decomposed_masters_df=pd.DataFrame.from_dict(seasonal_decomposed_masters_df)
 
-seasonal_decomposed_phd_df={}
+# seasonal_decomposed_phd_df={}
 
-for name, series in phd_limited.iteritems():
+# for name, series in phd_limited.iteritems():
 
-	ts_obj=TimeSeries(series).decompose(period=2)
-	res=ts_obj.decomposed_obj.resid.dropna()
-	t=TimeSeries(res).test_stationarity()
-	#print(t[0]) 
-	#print(t[1])
-	#time.sleep(1)
-	seasonal_decomposed_phd_df.update({name:res})
+# 	ts_obj=TimeSeries(series).decompose(period=2)
+# 	res=ts_obj.decomposed_obj.resid.dropna()
+# 	t=TimeSeries(res).test_stationarity()
+# 	#print(t[0]) 
+# 	#print(t[1])
+# 	#time.sleep(1)
+# 	seasonal_decomposed_phd_df.update({name:res})
 
-seasonal_decomposed_phd_df=pd.DataFrame.from_dict(seasonal_decomposed_phd_df)
+# seasonal_decomposed_phd_df=pd.DataFrame.from_dict(seasonal_decomposed_phd_df)
 
-###
-seasonal_decompose=True
+# ###
 
-if seasonal_decompose:
-	masters_diff=seasonal_decomposed_masters_df
-	phd_diff=seasonal_decomposed_phd_df
+# if seasonal_decompose:
+# 	masters_diff=seasonal_decomposed_masters_df
+# 	phd_diff=seasonal_decomposed_phd_df
+# 	print("1")
 
-if stl_decompose:
+# if stl_decompose:
 
-	masters_diff=stl_decomposed_masters_df
-	phd_diff=stl_decomposed_phd_df
-
+# 	masters_diff=stl_decomposed_masters_df
+# 	phd_diff=stl_decomposed_phd_df
+# 	print("1")
 
 normalized_masters_diff=(masters_diff-masters_diff.min())/(masters_diff.max()-masters_diff.min())
 #print(decompose_and_test_stationarity(normalized_masters_diff))
@@ -260,32 +257,33 @@ for cluster in range(2,k+1):
 	
 	### decorator applied with the first approach 
 	### (without passing to clustering decorator manually)
-	res=clustering(normalized_masters_diff,nclusters=cluster,distance_metric="softdtw",pca=False) # preprocess="min_max"
+	res=clustering(normalized_masters_diff,nclusters=cluster,distance_metric="softdtw",pca=True) # preprocess="min_max"
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 
-print("---")
+# print("---")
 print("PhD data clustering results.")
 print("---")
 
+
 for cluster in range(2,k+1):	
 	
-	res=clustering(normalized_phd_diff,nclusters=cluster,distance_metric="softdtw",pca=False) 
+	res=clustering(normalized_phd_diff,nclusters=cluster,distance_metric="softdtw",pca=True) 
 	print("The silhouette score for {} clusters is {}.".format(cluster,round(res["silhouette"],3)))
 
 time.sleep(5)
+
 
 ### Optimal clusters with silhouette scores with normalized datasets.
 vis=True #for silhouette visualization.
 
 print("---")
 
-
 ### decorator call with arguments, for both master's and phd,second approach.
 ### Metrics do not need to be the same, but the same metric in genereal produces higher results.
 res=clustering_decorator(vis,visualize_silhoueete,
 	distance_metric="softdtw")(clustering)(normalized_masters_diff,
-	nclusters=2,plot=True,distance_metric="softdtw",title="Adjusted Time Series: Master's Dataset")
+	nclusters=2,plot=True,distance_metric="softdtw",title="Adjusted Time Series: Master's Dataset",pca=True)
 
 
 rd=res["dict_of_cluster_names"]
@@ -297,9 +295,10 @@ for cluster,columns in rd.items():
 print("---")
 
 res=clustering_decorator(vis,visualize_silhoueete,distance_metric="softdtw")(clustering)(normalized_phd_diff,nclusters=3,
-	plot=True,distance_metric="softdtw",title="Adjusted Time Series: PhD Dataset")
+	plot=True,distance_metric="softdtw",title="Adjusted Time Series: PhD Dataset",pca=False)
 
 rd=res["dict_of_cluster_names"]
 
 for cluster,columns in rd.items():
 	print("For PhD :", cluster,"has {} series.".format(len(columns)))	
+
