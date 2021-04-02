@@ -73,6 +73,10 @@ for pcol in phd_cols:
 	phd_limited[pcol]=phd_data[pcol]
 
 
+# master_limited.corr().to_csv("correlation_datasets/master_limited.csv")
+# phd_limited.corr().to_csv("correlation_datasets/phd.csv")
+
+
 assert len(master_limited.columns)==len(phd_limited.columns)
 
 print("Stationarity test for the Masters Dataset")
@@ -87,6 +91,9 @@ print("Stationarity test for the PhD Dataset")
 masters_first_diff=master_limited.diff().dropna()
 phd_first_diff=phd_limited.diff().dropna()
 
+# masters_first_diff.corr().to_csv("correlation_datasets/masters_first_diff.csv")
+# phd_first_diff.corr().to_csv("correlation_datasets/phd_first_diff.csv")
+# sys.exit()
 
 print("Number of rows in Masters before and after idfferencing is {} and {}.".format(master_limited.shape[0],masters_first_diff.shape[0]))
 print("Number of rows in PhD before and after differencing is {} and {}.".format(phd_limited.shape[0],phd_first_diff.shape[0]))

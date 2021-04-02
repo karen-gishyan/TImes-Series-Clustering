@@ -2,7 +2,6 @@ from data import *
 from statsmodels.tsa.seasonal import seasonal_decompose
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.seasonal import STL
-
 import time
 
 class TimeSeries:
